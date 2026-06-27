@@ -358,5 +358,70 @@ initTimers();
 
 
 </script>
+// ── Firebase Sync ──────────────────────────────────────────────────────────
+(function(){
+const _fbCfg = {
+  apiKey: "AIzaSyBAMgHvDHN3ZKxNYKlJuDM9KKPy3kS_kAo",
+  authDomain: "career-path-3a3e5.firebaseapp.com",
+  databaseURL: "https://career-path-3a3e5-default-rtdb.firebaseio.com",
+  projectId: "career-path-3a3e5",
+  storageBucket: "career-path-3a3e5.firebasestorage.app",
+  messagingSenderId: "471347438093",
+  appId: "1:471347438093:web:d9b8b50f11d6c584ee6b44"
+};
+if(!firebase.apps.length) firebase.initializeApp(_fbCfg);
+const _auth = firebase.auth();
+const _db   = firebase.database();
+let _uid = null;
+
+function _ref(sub){ return _db.ref('users/'+_uid+'/mes'+MONTH_NUM+'/'+sub); }
+
+// Patch save() and saveTimers()
+const _save0 = save;
+save = function(){
+  _save0();
+  if(_uid) _ref('tasks').set(state);
+};
+const _st0 = saveTimers;
+saveTimers = function(){
+  _st0();
+  if(_uid) _ref('timers').set(timerState);
+};
+
+function _updateBtn(){
+  const btn = document.getElementById('fbBtn');
+  if(!btn) return;
+  const user = _auth.currentUser;
+  if(user){
+    btn.textContent = '☁️ ' + user.displayName.split(' ')[0];
+    btn.style.cssText = 'font-size:11px;padding:5px 10px;border-radius:7px;border:1px solid #8dd4a0;cursor:pointer;background:#e8f8ec;color:#2d8a40';
+    btn.onclick = function(){ _auth.signOut(); };
+  } else {
+    btn.textContent = '☁️ Sync';
+    btn.style.cssText = 'font-size:11px;padding:5px 10px;border-radius:7px;border:1px solid #ddd;cursor:pointer;background:#fff;color:#555';
+    btn.onclick = function(){
+      _auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+        .catch(function(e){ alert('Error: '+e.message); });
+    };
+  }
+}
+
+_auth.onAuthStateChanged(function(user){
+  _updateBtn();
+  if(!user){ _uid=null; return; }
+  _uid = user.uid;
+  // Load Firebase data (Firebase wins over localStorage)
+  _ref('tasks').once('value').then(function(snap){
+    const d = snap.val();
+    if(d){ state = d; try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
+    return _ref('timers').once('value');
+  }).then(function(snap2){
+    const d2 = snap2.val();
+    if(d2){ timerState = d2; try{ localStorage.setItem(TIMER_STORE, JSON.stringify(timerState)); }catch(e){} }
+    Object.keys(TASKS).forEach(function(k){ applyTask(k); });
+    updateAll(); initTimers();
+  });
+});
+})();
 <div class="section" id="sec-sq" style="padding:14px 18px 40px"><div style="font-size:12px;color:#aaa;margin-bottom:16px">Recursos gratuitos para complementar el mes. Ábrelos en una nueva pestaña y explora a tu ritmo 🚀</div><div class="sq-cat"><div class="sq-cat-title">🧠 Deep Learning</div><div class="sq-grid"><a class="sq-item" href="https://course.fast.ai" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">fast.ai — Practical DL Part 1</div><div class="sq-item-desc">El curso DL más práctico, gratis</div><div class="sq-item-link">course.fast.ai ↗</div></div></a><a class="sq-item" href="https://d2l.ai" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">d2l.ai</div><div class="sq-item-desc">Dive into Deep Learning — libro interactivo</div><div class="sq-item-link">d2l.ai ↗</div></div></a><a class="sq-item" href="https://cs231n.github.io" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">CS231n Stanford</div><div class="sq-item-desc">Notas y materiales del curso de CV de Stanford</div><div class="sq-item-link">cs231n.github.io ↗</div></div></a><a class="sq-item" href="https://youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">3Blue1Brown — Neural Nets</div><div class="sq-item-desc">La mejor explicación visual de redes neuronales</div><div class="sq-item-link">youtube.com ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">💬 NLP</div><div class="sq-grid"><a class="sq-item" href="https://huggingface.co/learn/nlp-course" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Hugging Face NLP Course</div><div class="sq-item-desc">Curso gratis oficial de HF — el estándar</div><div class="sq-item-link">huggingface.co ↗</div></div></a><a class="sq-item" href="https://web.stanford.edu/class/cs224n" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Stanford CS224N</div><div class="sq-item-desc">NLP con Deep Learning, materiales libres</div><div class="sq-item-link">web.stanford.edu ↗</div></div></a><a class="sq-item" href="https://course.spacy.io" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">spaCy Course</div><div class="sq-item-desc">NLP práctico con spaCy, gratis e interactivo</div><div class="sq-item-link">course.spacy.io ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">👁️ Computer Vision</div><div class="sq-grid"><a class="sq-item" href="https://blog.roboflow.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Roboflow Blog</div><div class="sq-item-desc">Tutoriales de CV y YOLO con código</div><div class="sq-item-link">blog.roboflow.com ↗</div></div></a><a class="sq-item" href="https://docs.opencv.org/4.x/d9/df8/tutorial_root.html" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">OpenCV Tutorials</div><div class="sq-item-desc">Documentación oficial con ejemplos</div><div class="sq-item-link">docs.opencv.org ↗</div></div></a><a class="sq-item" href="https://kaggle.com/learn/computer-vision" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Kaggle — Computer Vision</div><div class="sq-item-desc">Micro-curso de CV con PyTorch</div><div class="sq-item-link">kaggle.com ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">🚀 Apps y Deploy</div><div class="sq-grid"><a class="sq-item" href="https://streamlit.io/gallery" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Streamlit Gallery</div><div class="sq-item-desc">Inspírate con apps reales en producción</div><div class="sq-item-link">streamlit.io ↗</div></div></a><a class="sq-item" href="https://huggingface.co/spaces" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Gradio Demos</div><div class="sq-item-desc">Miles de demos de IA gratis en HF Spaces</div><div class="sq-item-link">huggingface.co ↗</div></div></a><a class="sq-item" href="https://huggingface.co/spaces" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">HF Spaces</div><div class="sq-item-desc">Deploy gratis de tu app con Gradio/Streamlit</div><div class="sq-item-link">huggingface.co ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">💻 Práctica</div><div class="sq-grid"><a class="sq-item" href="https://kaggle.com/competitions?listOption=active" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Kaggle DL Competitions</div><div class="sq-item-desc">Compite con modelos reales</div><div class="sq-item-link">kaggle.com ↗</div></div></a><a class="sq-item" href="https://paperswithcode.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Papers With Code</div><div class="sq-item-desc">Papers + código reproducible de SOTA</div><div class="sq-item-link">paperswithcode.com ↗</div></div></a></div></div></div></body>
 </html>

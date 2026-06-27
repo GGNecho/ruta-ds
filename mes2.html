@@ -358,5 +358,70 @@ initTimers();
 
 
 </script>
+// ── Firebase Sync ──────────────────────────────────────────────────────────
+(function(){
+const _fbCfg = {
+  apiKey: "AIzaSyBAMgHvDHN3ZKxNYKlJuDM9KKPy3kS_kAo",
+  authDomain: "career-path-3a3e5.firebaseapp.com",
+  databaseURL: "https://career-path-3a3e5-default-rtdb.firebaseio.com",
+  projectId: "career-path-3a3e5",
+  storageBucket: "career-path-3a3e5.firebasestorage.app",
+  messagingSenderId: "471347438093",
+  appId: "1:471347438093:web:d9b8b50f11d6c584ee6b44"
+};
+if(!firebase.apps.length) firebase.initializeApp(_fbCfg);
+const _auth = firebase.auth();
+const _db   = firebase.database();
+let _uid = null;
+
+function _ref(sub){ return _db.ref('users/'+_uid+'/mes'+MONTH_NUM+'/'+sub); }
+
+// Patch save() and saveTimers()
+const _save0 = save;
+save = function(){
+  _save0();
+  if(_uid) _ref('tasks').set(state);
+};
+const _st0 = saveTimers;
+saveTimers = function(){
+  _st0();
+  if(_uid) _ref('timers').set(timerState);
+};
+
+function _updateBtn(){
+  const btn = document.getElementById('fbBtn');
+  if(!btn) return;
+  const user = _auth.currentUser;
+  if(user){
+    btn.textContent = '☁️ ' + user.displayName.split(' ')[0];
+    btn.style.cssText = 'font-size:11px;padding:5px 10px;border-radius:7px;border:1px solid #8dd4a0;cursor:pointer;background:#e8f8ec;color:#2d8a40';
+    btn.onclick = function(){ _auth.signOut(); };
+  } else {
+    btn.textContent = '☁️ Sync';
+    btn.style.cssText = 'font-size:11px;padding:5px 10px;border-radius:7px;border:1px solid #ddd;cursor:pointer;background:#fff;color:#555';
+    btn.onclick = function(){
+      _auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+        .catch(function(e){ alert('Error: '+e.message); });
+    };
+  }
+}
+
+_auth.onAuthStateChanged(function(user){
+  _updateBtn();
+  if(!user){ _uid=null; return; }
+  _uid = user.uid;
+  // Load Firebase data (Firebase wins over localStorage)
+  _ref('tasks').once('value').then(function(snap){
+    const d = snap.val();
+    if(d){ state = d; try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
+    return _ref('timers').once('value');
+  }).then(function(snap2){
+    const d2 = snap2.val();
+    if(d2){ timerState = d2; try{ localStorage.setItem(TIMER_STORE, JSON.stringify(timerState)); }catch(e){} }
+    Object.keys(TASKS).forEach(function(k){ applyTask(k); });
+    updateAll(); initTimers();
+  });
+});
+})();
 <div class="section" id="sec-sq" style="padding:14px 18px 40px"><div style="font-size:12px;color:#aaa;margin-bottom:16px">Recursos gratuitos para complementar el mes. Ábrelos en una nueva pestaña y explora a tu ritmo 🚀</div><div class="sq-cat"><div class="sq-cat-title">🤖 ML Avanzado</div><div class="sq-grid"><a class="sq-item" href="https://kaggle.com/learn/intermediate-machine-learning" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Kaggle — Intermediate ML</div><div class="sq-item-desc">XGBoost, pipelines, validación</div><div class="sq-item-link">kaggle.com ↗</div></div></a><a class="sq-item" href="https://kaggle.com/learn/feature-engineering" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Kaggle — Feature Engineering</div><div class="sq-item-desc">Técnicas de FE con datos reales</div><div class="sq-item-link">kaggle.com ↗</div></div></a><a class="sq-item" href="https://optuna.readthedocs.io" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Optuna Docs</div><div class="sq-item-desc">Documentación oficial + tutoriales</div><div class="sq-item-link">optuna.readthedocs.io ↗</div></div></a><a class="sq-item" href="https://shap.readthedocs.io" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">SHAP Docs</div><div class="sq-item-desc">Interpretabilidad de modelos ML</div><div class="sq-item-link">shap.readthedocs.io ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">📈 Series de Tiempo</div><div class="sq-grid"><a class="sq-item" href="https://kaggle.com/learn/time-series" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Kaggle — Time Series</div><div class="sq-item-desc">Forecasting con código práctico</div><div class="sq-item-link">kaggle.com ↗</div></div></a><a class="sq-item" href="https://facebook.github.io/prophet" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Prophet Docs</div><div class="sq-item-desc">Documentación + ejemplos de Meta</div><div class="sq-item-link">facebook.github.io ↗</div></div></a><a class="sq-item" href="https://unit8co.github.io/darts" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Darts Library</div><div class="sq-item-desc">Librería open-source de forecasting</div><div class="sq-item-link">unit8co.github.io ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">📊 BI y Visualización</div><div class="sq-grid"><a class="sq-item" href="https://public.tableau.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Tableau Public</div><div class="sq-item-desc">Tableau gratis con datos públicos</div><div class="sq-item-link">public.tableau.com ↗</div></div></a><a class="sq-item" href="https://lookerstudio.google.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Google Looker Studio</div><div class="sq-item-desc">Power BI gratis de Google</div><div class="sq-item-link">lookerstudio.google.com ↗</div></div></a><a class="sq-item" href="https://kaggle.com/learn/data-visualization" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Kaggle — Data Viz</div><div class="sq-item-desc">Seaborn y storytelling con datos</div><div class="sq-item-link">kaggle.com ↗</div></div></a><a class="sq-item" href="https://matplotlib.org/stable/gallery" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Matplotlib Gallery</div><div class="sq-item-desc">Cientos de ejemplos con código</div><div class="sq-item-link">matplotlib.org ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">🧪 A/B Testing</div><div class="sq-grid"><a class="sq-item" href="https://evanmiller.org/ab-testing" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Evan Miller A/B Calculator</div><div class="sq-item-desc">Calculadora de significancia estadística</div><div class="sq-item-link">evanmiller.org ↗</div></div></a><a class="sq-item" href="https://towardsdatascience.com/tagged/ab-testing" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Statistical Significance Explained</div><div class="sq-item-desc">Artículos en Towards Data Science</div><div class="sq-item-link">towardsdatascience.com ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">💻 Competencias</div><div class="sq-grid"><a class="sq-item" href="https://kaggle.com/c/titanic" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Kaggle Titanic</div><div class="sq-item-desc">La competencia clásica para empezar</div><div class="sq-item-link">kaggle.com ↗</div></div></a><a class="sq-item" href="https://kaggle.com/c/house-prices-advanced-regression-techniques" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Kaggle House Prices</div><div class="sq-item-desc">Regresión con Feature Engineering</div><div class="sq-item-link">kaggle.com ↗</div></div></a><a class="sq-item" href="https://stratascratch.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">StrataScratch</div><div class="sq-item-desc">Casos de entrevista de empresas reales (Google, Netflix...)</div><div class="sq-item-link">stratascratch.com ↗</div></div></a></div></div></div></body>
 </html>

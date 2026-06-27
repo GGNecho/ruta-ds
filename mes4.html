@@ -358,5 +358,70 @@ initTimers();
 
 
 </script>
+// ── Firebase Sync ──────────────────────────────────────────────────────────
+(function(){
+const _fbCfg = {
+  apiKey: "AIzaSyBAMgHvDHN3ZKxNYKlJuDM9KKPy3kS_kAo",
+  authDomain: "career-path-3a3e5.firebaseapp.com",
+  databaseURL: "https://career-path-3a3e5-default-rtdb.firebaseio.com",
+  projectId: "career-path-3a3e5",
+  storageBucket: "career-path-3a3e5.firebasestorage.app",
+  messagingSenderId: "471347438093",
+  appId: "1:471347438093:web:d9b8b50f11d6c584ee6b44"
+};
+if(!firebase.apps.length) firebase.initializeApp(_fbCfg);
+const _auth = firebase.auth();
+const _db   = firebase.database();
+let _uid = null;
+
+function _ref(sub){ return _db.ref('users/'+_uid+'/mes'+MONTH_NUM+'/'+sub); }
+
+// Patch save() and saveTimers()
+const _save0 = save;
+save = function(){
+  _save0();
+  if(_uid) _ref('tasks').set(state);
+};
+const _st0 = saveTimers;
+saveTimers = function(){
+  _st0();
+  if(_uid) _ref('timers').set(timerState);
+};
+
+function _updateBtn(){
+  const btn = document.getElementById('fbBtn');
+  if(!btn) return;
+  const user = _auth.currentUser;
+  if(user){
+    btn.textContent = '☁️ ' + user.displayName.split(' ')[0];
+    btn.style.cssText = 'font-size:11px;padding:5px 10px;border-radius:7px;border:1px solid #8dd4a0;cursor:pointer;background:#e8f8ec;color:#2d8a40';
+    btn.onclick = function(){ _auth.signOut(); };
+  } else {
+    btn.textContent = '☁️ Sync';
+    btn.style.cssText = 'font-size:11px;padding:5px 10px;border-radius:7px;border:1px solid #ddd;cursor:pointer;background:#fff;color:#555';
+    btn.onclick = function(){
+      _auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+        .catch(function(e){ alert('Error: '+e.message); });
+    };
+  }
+}
+
+_auth.onAuthStateChanged(function(user){
+  _updateBtn();
+  if(!user){ _uid=null; return; }
+  _uid = user.uid;
+  // Load Firebase data (Firebase wins over localStorage)
+  _ref('tasks').once('value').then(function(snap){
+    const d = snap.val();
+    if(d){ state = d; try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
+    return _ref('timers').once('value');
+  }).then(function(snap2){
+    const d2 = snap2.val();
+    if(d2){ timerState = d2; try{ localStorage.setItem(TIMER_STORE, JSON.stringify(timerState)); }catch(e){} }
+    Object.keys(TASKS).forEach(function(k){ applyTask(k); });
+    updateAll(); initTimers();
+  });
+});
+})();
 <div class="section" id="sec-sq" style="padding:14px 18px 40px"><div style="font-size:12px;color:#aaa;margin-bottom:16px">Recursos gratuitos para complementar el mes. Ábrelos en una nueva pestaña y explora a tu ritmo 🚀</div><div class="sq-cat"><div class="sq-cat-title">✨ LLMs y GenAI</div><div class="sq-grid"><a class="sq-item" href="https://huggingface.co/learn" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Hugging Face LLM Course</div><div class="sq-item-desc">Cursos gratis: NLP, RL, DiffusionModels</div><div class="sq-item-link">huggingface.co ↗</div></div></a><a class="sq-item" href="https://youtube.com/@AndrejKarpathy" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Andrej Karpathy — Zero to Hero</div><div class="sq-item-desc">Construye GPT desde cero, explicado por el creador</div><div class="sq-item-link">youtube.com ↗</div></div></a><a class="sq-item" href="https://cookbook.openai.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">OpenAI Cookbook</div><div class="sq-item-desc">Ejemplos reales de uso de la API de OpenAI</div><div class="sq-item-link">cookbook.openai.com ↗</div></div></a><a class="sq-item" href="https://promptingguide.ai" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Prompt Engineering Guide</div><div class="sq-item-desc">La guía más completa de prompting, gratis</div><div class="sq-item-link">promptingguide.ai ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">🔗 RAG y Agentes</div><div class="sq-grid"><a class="sq-item" href="https://python.langchain.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">LangChain Docs</div><div class="sq-item-desc">Documentación oficial + tutoriales</div><div class="sq-item-link">python.langchain.com ↗</div></div></a><a class="sq-item" href="https://docs.llamaindex.ai" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">LlamaIndex Docs</div><div class="sq-item-desc">Framework de RAG más usado</div><div class="sq-item-link">docs.llamaindex.ai ↗</div></div></a><a class="sq-item" href="https://academy.langchain.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">LangChain Academy</div><div class="sq-item-desc">Cursos gratis de LangChain</div><div class="sq-item-link">academy.langchain.com ↗</div></div></a><a class="sq-item" href="https://docs.crewai.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">CrewAI Docs</div><div class="sq-item-desc">Multi-agentes con código limpio</div><div class="sq-item-link">docs.crewai.com ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">🤖 Modelos Open Source</div><div class="sq-grid"><a class="sq-item" href="https://ollama.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Ollama</div><div class="sq-item-desc">Corre LLMs localmente gratis (Llama, Mistral...)</div><div class="sq-item-link">ollama.com ↗</div></div></a><a class="sq-item" href="https://huggingface.co/models" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">HF Model Hub</div><div class="sq-item-desc">Miles de modelos gratis para descargar</div><div class="sq-item-link">huggingface.co ↗</div></div></a><a class="sq-item" href="https://lmstudio.ai" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">LM Studio</div><div class="sq-item-desc">GUI para correr LLMs locales sin código</div><div class="sq-item-link">lmstudio.ai ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">🔧 Automatización</div><div class="sq-grid"><a class="sq-item" href="https://n8n.io" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">n8n Cloud Free</div><div class="sq-item-desc">Automatización visual, tier gratis</div><div class="sq-item-link">n8n.io ↗</div></div></a><a class="sq-item" href="https://make.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Make.com</div><div class="sq-item-desc">Zapier alternativa con tier gratis generoso</div><div class="sq-item-link">make.com ↗</div></div></a></div></div></div></body>
 </html>

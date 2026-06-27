@@ -358,5 +358,70 @@ initTimers();
 
 
 </script>
+// ── Firebase Sync ──────────────────────────────────────────────────────────
+(function(){
+const _fbCfg = {
+  apiKey: "AIzaSyBAMgHvDHN3ZKxNYKlJuDM9KKPy3kS_kAo",
+  authDomain: "career-path-3a3e5.firebaseapp.com",
+  databaseURL: "https://career-path-3a3e5-default-rtdb.firebaseio.com",
+  projectId: "career-path-3a3e5",
+  storageBucket: "career-path-3a3e5.firebasestorage.app",
+  messagingSenderId: "471347438093",
+  appId: "1:471347438093:web:d9b8b50f11d6c584ee6b44"
+};
+if(!firebase.apps.length) firebase.initializeApp(_fbCfg);
+const _auth = firebase.auth();
+const _db   = firebase.database();
+let _uid = null;
+
+function _ref(sub){ return _db.ref('users/'+_uid+'/mes'+MONTH_NUM+'/'+sub); }
+
+// Patch save() and saveTimers()
+const _save0 = save;
+save = function(){
+  _save0();
+  if(_uid) _ref('tasks').set(state);
+};
+const _st0 = saveTimers;
+saveTimers = function(){
+  _st0();
+  if(_uid) _ref('timers').set(timerState);
+};
+
+function _updateBtn(){
+  const btn = document.getElementById('fbBtn');
+  if(!btn) return;
+  const user = _auth.currentUser;
+  if(user){
+    btn.textContent = '☁️ ' + user.displayName.split(' ')[0];
+    btn.style.cssText = 'font-size:11px;padding:5px 10px;border-radius:7px;border:1px solid #8dd4a0;cursor:pointer;background:#e8f8ec;color:#2d8a40';
+    btn.onclick = function(){ _auth.signOut(); };
+  } else {
+    btn.textContent = '☁️ Sync';
+    btn.style.cssText = 'font-size:11px;padding:5px 10px;border-radius:7px;border:1px solid #ddd;cursor:pointer;background:#fff;color:#555';
+    btn.onclick = function(){
+      _auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+        .catch(function(e){ alert('Error: '+e.message); });
+    };
+  }
+}
+
+_auth.onAuthStateChanged(function(user){
+  _updateBtn();
+  if(!user){ _uid=null; return; }
+  _uid = user.uid;
+  // Load Firebase data (Firebase wins over localStorage)
+  _ref('tasks').once('value').then(function(snap){
+    const d = snap.val();
+    if(d){ state = d; try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
+    return _ref('timers').once('value');
+  }).then(function(snap2){
+    const d2 = snap2.val();
+    if(d2){ timerState = d2; try{ localStorage.setItem(TIMER_STORE, JSON.stringify(timerState)); }catch(e){} }
+    Object.keys(TASKS).forEach(function(k){ applyTask(k); });
+    updateAll(); initTimers();
+  });
+});
+})();
 <div class="section" id="sec-sq" style="padding:14px 18px 40px"><div style="font-size:12px;color:#aaa;margin-bottom:16px">Recursos gratuitos para complementar el mes. Ábrelos en una nueva pestaña y explora a tu ritmo 🚀</div><div class="sq-cat"><div class="sq-cat-title">🔧 MLOps</div><div class="sq-grid"><a class="sq-item" href="https://madewithml.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Made With ML</div><div class="sq-item-desc">MLOps desde cero, gratis y muy práctico</div><div class="sq-item-link">madewithml.com ↗</div></div></a><a class="sq-item" href="https://mlflow.org/docs/latest" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">MLflow Docs</div><div class="sq-item-desc">Documentación oficial + quickstart</div><div class="sq-item-link">mlflow.org ↗</div></div></a><a class="sq-item" href="https://docs.evidentlyai.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Evidently AI Docs</div><div class="sq-item-desc">Monitoreo de modelos open-source</div><div class="sq-item-link">docs.evidentlyai.com ↗</div></div></a><a class="sq-item" href="https://dvc.org/doc" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">DVC Docs</div><div class="sq-item-desc">Versionado de datos con Git</div><div class="sq-item-link">dvc.org ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">🐳 Docker y CI/CD</div><div class="sq-grid"><a class="sq-item" href="https://labs.play-with-docker.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Play with Docker</div><div class="sq-item-desc">Docker en el navegador, gratis, sin instalar</div><div class="sq-item-link">labs.play-with-docker.com ↗</div></div></a><a class="sq-item" href="https://docs.docker.com/get-started" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Docker Getting Started</div><div class="sq-item-desc">Tutorial oficial de Docker</div><div class="sq-item-link">docs.docker.com ↗</div></div></a><a class="sq-item" href="https://docs.github.com/en/actions" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">GitHub Actions Docs</div><div class="sq-item-desc">CI/CD gratis con GitHub</div><div class="sq-item-link">docs.github.com ↗</div></div></a><a class="sq-item" href="https://skills.github.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">GitHub Skills</div><div class="sq-item-desc">Cursos interactivos de GitHub gratis</div><div class="sq-item-link">skills.github.com ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">☁️ Cloud</div><div class="sq-grid"><a class="sq-item" href="https://aws.amazon.com/free" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">AWS Free Tier</div><div class="sq-item-desc">12 meses gratis de servicios AWS</div><div class="sq-item-link">aws.amazon.com ↗</div></div></a><a class="sq-item" href="https://cloud.google.com/free" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">GCP Free Tier</div><div class="sq-item-desc">$300 crédito + tier siempre gratis</div><div class="sq-item-link">cloud.google.com ↗</div></div></a><a class="sq-item" href="https://colab.research.google.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Google Colab Pro</div><div class="sq-item-desc">GPU gratis, ideal para entrenar modelos</div><div class="sq-item-link">colab.research.google.com ↗</div></div></a><a class="sq-item" href="https://render.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Render.com</div><div class="sq-item-desc">Deploy de APIs gratis (alternativa a Heroku)</div><div class="sq-item-link">render.com ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">🚀 APIs y Deploy</div><div class="sq-grid"><a class="sq-item" href="https://fastapi.tiangolo.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">FastAPI Docs</div><div class="sq-item-desc">Documentación + tutorial completo</div><div class="sq-item-link">fastapi.tiangolo.com ↗</div></div></a><a class="sq-item" href="https://railway.app" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Railway.app</div><div class="sq-item-desc">Deploy de contenedores, tier gratis</div><div class="sq-item-link">railway.app ↗</div></div></a><a class="sq-item" href="https://huggingface.co/spaces" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Hugging Face Spaces</div><div class="sq-item-desc">Deploy gratis de apps ML</div><div class="sq-item-link">huggingface.co ↗</div></div></a></div></div></div></body>
 </html>
