@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes 3 — Deep Learning + NLP + Computer Vision + Apps</title>
+<style>
+:root{color-scheme:light}*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f7f8fa;color:#1a1a1a;font-size:13px}
+.hdr{background:#fff;border-bottom:1px solid #e8e8e8;padding:10px 18px;position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hdr-left h1{font-size:14px;font-weight:700}.hdr-left .sub{font-size:11px;color:#888;margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.prog-bar{width:100px;height:7px;background:#eee;border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#1a5fa8,#2d8a40);border-radius:4px;transition:width .4s}
+.prog-pct{font-size:12px;font-weight:700;color:#1a5fa8;min-width:32px}
+.icon-btn{font-size:11px;color:#999;cursor:pointer;padding:4px 8px;border-radius:6px;border:1px solid #eee;background:#fff}
+.icon-btn:hover{color:#555;border-color:#ccc}
+.dl-btn{font-size:11px;font-weight:700;padding:5px 11px;background:#1a5fa8;color:#fff;border:none;border-radius:7px;cursor:pointer}
+.dl-btn:hover{background:#1550a0}
+.nav{display:flex;gap:4px;padding:10px 18px 0;background:#f7f8fa;border-bottom:1px solid #e8e8e8;position:sticky;top:57px;z-index:190;flex-wrap:wrap}
+.nav-tab{padding:6px 12px;border-radius:8px 8px 0 0;font-size:12px;font-weight:600;cursor:pointer;border:1px solid transparent;border-bottom:none;background:#eee;color:#666;transition:all .15s}
+.nav-tab.active{background:#fff;color:#1a1a1a;border-color:#e0e0e0}
+.section{display:none;padding:14px 18px 40px}.section.active{display:block}
+.wtabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
+.wtab{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #e0e0e0;background:#fff;color:#666;transition:all .15s}
+.wtab.active{background:#1a5fa8;color:#fff;border-color:#1a5fa8}
+.wcontent{display:none}.wcontent.active{display:block}
+.wsub{font-size:11px;color:#888;margin-bottom:12px}
+.day-card{background:#fff;border:1px solid #e8e8e8;border-radius:11px;margin-bottom:9px;overflow:hidden}
+.day-hdr{display:flex;align-items:center;padding:9px 13px;border-bottom:1px solid #f0f0f0;gap:10px}
+.day-name{font-weight:700;font-size:12px;min-width:78px}
+.day-theme{font-size:11px;color:#666;flex:1}
+.day-badge{font-size:10px;padding:2px 7px;border-radius:10px;background:#f0f0f0;color:#999;font-weight:600}
+.day-badge.all-done{background:#e0f5e8;color:#1e7a30}
+.task-row{display:flex;align-items:flex-start;padding:8px 13px;gap:9px;border-bottom:1px solid #f5f5f5;cursor:pointer;transition:background .1s}
+.task-row:last-of-type{border-bottom:none}.task-row:hover{background:#fafafa}.task-row.timing{background:#fffbf0!important}
+.task-check{width:17px;height:17px;border-radius:4px;border:2px solid #ccc;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;transition:all .15s}
+.task-check.done{background:#2d8a40;border-color:#2d8a40}
+.task-info{flex:1;min-width:0}
+.task-slot{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#aaa;margin-bottom:2px}
+.task-title{font-size:12px;font-weight:600;line-height:1.4}
+.task-row.done .task-title{color:#bbb;text-decoration:line-through}
+.task-desc{font-size:11px;color:#888;line-height:1.4;margin-top:2px}
+.task-row.done .task-desc{color:#ccc}
+.task-meta{display:flex;align-items:center;gap:5px;margin-top:4px;flex-wrap:wrap}
+.course-tag{font-size:10px;padding:2px 7px;border-radius:5px;font-weight:500}
+.co{background:#e8f0ff;color:#0056d3}.li{background:#e8f2ff;color:#0a66c2}.pr{background:#e8fff0;color:#1e7a30}
+.skill-pip{font-size:9px;padding:1px 5px;border-radius:4px;font-weight:600;opacity:.8}
+.task-timer{display:flex;align-items:center;gap:7px;margin-top:6px;padding-top:6px;border-top:1px dashed #efefef}
+.timer-real{font-size:11px;font-family:monospace;font-weight:700;color:#1a5fa8;min-width:42px}
+.task-row.timing .timer-real{color:#c06020}
+.timer-sep,.timer-est{font-size:11px;color:#aaa;font-family:monospace}
+.timer-btn{width:22px;height:22px;border-radius:5px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:11px;padding:0;flex-shrink:0}
+.timer-btn:hover{border-color:#1a5fa8}
+.task-row.timing .timer-btn{border-color:#c06020;background:#fff8f0}
+.task-weight{font-size:9px;padding:1px 6px;border-radius:10px;background:#f5f5f5;color:#aaa;font-weight:700;margin-left:auto;white-space:nowrap}
+.deliv{margin:0 13px 11px;padding:7px 10px;background:#fffbf0;border:1px solid #f5e090;border-radius:7px;font-size:11px;color:#7a5800;display:flex;align-items:center;gap:6px}
+.task-row.content-slot{background:#fdf8ff}.task-row.content-slot:hover{background:#f8f0ff}
+.gantt-wrap{overflow-x:auto}
+.gantt{min-width:560px}
+.gantt-hdr{display:grid;grid-template-columns:80px repeat(7,1fr);gap:3px;margin-bottom:4px}
+.gantt-hdr-cell{text-align:center;font-size:10px;font-weight:700;color:#888;padding:4px}
+.gantt-row{display:grid;grid-template-columns:80px repeat(7,1fr);gap:3px;margin-bottom:3px}
+.gantt-week-label{font-size:11px;font-weight:700;color:#555;padding:4px 6px}
+.gantt-cell{border-radius:8px;padding:6px 4px;text-align:center;border:1px solid #e8e8e8;background:#fff;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.gantt-cell.empty{background:#f7f8fa}.gantt-cell.partial{background:#fff8e8;border-color:#f5d890}.gantt-cell.complete{background:#e8f8ec;border-color:#8dd4a0}
+.gantt-dots{display:flex;gap:3px;justify-content:center}
+.gantt-dot{width:7px;height:7px;border-radius:50%;background:#ddd}.gantt-dot.done{background:#2d8a40}.gantt-dot.content{background:#7c3aed}
+.gantt-pct{font-size:9px;color:#aaa;font-weight:600}.gantt-cell.complete .gantt-pct{color:#2d8a40}
+.gantt-time{font-size:9px;color:#c06020;font-family:monospace;font-weight:600}
+.gantt-legend{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#666}
+.legend-box{width:14px;height:14px;border-radius:4px}
+.skills-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:500px){.skills-grid{grid-template-columns:1fr}}
+.skill-card{background:#fff;border:1px solid #e8e8e8;border-radius:11px;padding:13px}
+.skill-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.skill-name{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+.skill-pts{font-size:11px;font-weight:700}
+.skill-bar-outer{height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden;margin-bottom:4px}
+.skill-bar-inner{height:100%;border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.skill-pct{font-size:10px;color:#aaa}
+.w1 .day-name{color:#1a5fa8}.w2 .day-name{color:#1e6b2a}.w3 .day-name{color:#a85500}.w4 .day-name{color:#6622cc}
+
+.sq-cat{margin-bottom:18px}
+.sq-cat-title{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.sq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+.sq-item{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:12px 14px;text-decoration:none;display:flex;align-items:flex-start;gap:10px;transition:border-color .15s,transform .1s}
+.sq-item:hover{border-color:#1a5fa8;transform:translateY(-1px)}
+.sq-item-icon{font-size:20px;flex-shrink:0;margin-top:1px}
+.sq-item-name{font-size:12px;font-weight:700;color:#1a1a1a;margin-bottom:2px}
+.sq-item-desc{font-size:11px;color:#888;line-height:1.4}
+.sq-item-link{font-size:10px;color:#1a5fa8;margin-top:3px}
+
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-left">
+    <h1 style="color:#e74c3c">📅 Mes 3 — Deep Learning + NLP + Computer Vision + Apps</h1>
+    <div class="sub">PyTorch · OpenCV · YOLO · spaCy · Hugging Face · Transformers · Streamlit · Gradio</div>
+  </div>
+  <div class="hdr-right">
+    <button class="dl-btn" onclick="downloadPlan()">📥 Plan</button>
+    <div class="prog-bar"><div class="prog-fill" id="gBar" style="width:0%"></div></div>
+    <div class="prog-pct" id="gPct">0%</div>
+    <button class="icon-btn" onclick="resetAll()">↺</button><button id="fbBtn" onclick="" style="font-size:11px;padding:5px 10px;border-radius:7px;border:1px solid #ddd;cursor:pointer;background:#fff;color:#555">☁️ Sync</button>
+  </div>
+</div>
+
+<div style="background:#fff;border-bottom:1px solid #e8e8e8;padding:8px 18px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+  <span style="font-size:11px;color:#aaa">Ir a:</span>
+  <a href="mes1.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">Mes 1</a> <a href="mes2.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">Mes 2</a> <a href="mes3.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#1a5fa8;color:#fff">Mes 3</a> <a href="mes4.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">Mes 4</a> <a href="mes5.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">Mes 5</a> <a href="mes6.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">Mes 6</a>
+  <a href="gantt.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">📅 Gantt Global</a>
+  <a href="skills.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">⚡ Skills</a>
+  <a href="index.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">🏠 Inicio</a>
+</div>
+
+<div class="nav">
+  <div class="nav-tab active" onclick="showNav('checklist',this)">📋 Checklist</div>
+  <div class="nav-tab" onclick="showNav('gantt',this)">📅 Gantt</div>
+  <div class="nav-tab" onclick="showNav('skills',this)">⚡ Skills</div>
+  <div class="nav-tab" onclick="showNav('sq',this)">🎯 Side Quests</div>
+</div>
+
+<div class="section active" id="sec-checklist">
+  <div class="wtabs">
+    <div class="wtab active" onclick="showWeek(1,this)">Semana 1</div>
+    <div class="wtab" onclick="showWeek(2,this)">Semana 2</div>
+    <div class="wtab" onclick="showWeek(3,this)">Semana 3</div>
+    <div class="wtab" onclick="showWeek(4,this)">Semana 4</div>
+  </div>
+  <div id="checklist-body"></div>
+</div>
+
+<div class="section" id="sec-gantt">
+  <div class="gantt-wrap">
+    <div class="gantt">
+      <div class="gantt-hdr"><div class="gantt-hdr-cell"></div><div class="gantt-hdr-cell">Lun</div><div class="gantt-hdr-cell">Mar</div><div class="gantt-hdr-cell">Mié</div><div class="gantt-hdr-cell">Jue</div><div class="gantt-hdr-cell">Vie</div><div class="gantt-hdr-cell">Sáb</div><div class="gantt-hdr-cell">Dom</div></div>
+      <div id="gantt-body"></div>
+    </div>
+    <div class="gantt-legend">
+      <div class="legend-item"><div class="legend-box" style="background:#f7f8fa;border:1px solid #e8e8e8"></div>Sin iniciar</div>
+      <div class="legend-item"><div class="legend-box" style="background:#fff8e8;border:1px solid #f5d890"></div>En progreso</div>
+      <div class="legend-item"><div class="legend-box" style="background:#e8f8ec;border:1px solid #8dd4a0"></div>Completo</div>
+      <div class="legend-item"><div class="gantt-dot done" style="margin:0"></div>Tarea</div>
+      <div class="legend-item"><div class="gantt-dot content" style="margin:0"></div>Contenido</div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="sec-skills">
+  <div class="skills-grid" id="skills-body"></div>
+</div>
+
+<script>
+const MONTH_NUM = 3;
+const MONTH_TITLE = 'Mes 3 — Deep Learning + NLP + Computer Vision + Apps';
+const STORE = 'ds_mes3_tasks';
+const TIMER_STORE = 'ds_mes3_timers';
+const SK_DEF = {"py": {"label": "Python", "icon": "🐍", "color": "#1a5fa8"}, "pd": {"label": "Pandas / NumPy", "icon": "🐼", "color": "#2d8a40"}, "sq": {"label": "SQL", "icon": "🗃️", "color": "#c06a00"}, "st": {"label": "Estadística", "icon": "📊", "color": "#7c3aed"}, "vz": {"label": "Visualización", "icon": "📈", "color": "#c0392b"}, "gt": {"label": "Git & GitHub", "icon": "⚙️", "color": "#156070"}, "ml": {"label": "Machine Learning", "icon": "🤖", "color": "#8b008b"}, "bi": {"label": "Power BI / Tableau", "icon": "📉", "color": "#d4850a"}, "dl": {"label": "Deep Learning", "icon": "🧠", "color": "#e74c3c"}, "nlp": {"label": "NLP / Texto", "icon": "💬", "color": "#16a085"}, "llm": {"label": "LLMs & GenAI", "icon": "✨", "color": "#8e44ad"}, "ops": {"label": "MLOps / Docker", "icon": "🔧", "color": "#2c3e50"}, "cl": {"label": "Cloud (AWS/GCP)", "icon": "☁️", "color": "#2980b9"}, "de": {"label": "Data Engineering", "icon": "⚡", "color": "#e67e22"}, "ct": {"label": "Portfolio / Contenido", "icon": "📝", "color": "#c05070"}, "cd": {"label": "Código / Proyectos", "icon": "💻", "color": "#444"}};
+const TASKS = {"1-1-1": {"w": 1, "d": 1, "sl": "🌅 Mañana · 4 hrs", "ti": "PyTorch: tensores y operaciones básicas", "de": "torch.tensor, dtype, device, reshape, broadcasting. GPU vs CPU. Primer tensor.", "co": "PyTorch.org · Tensor Tutorial", "ct": "pr", "sk": {"dl": 15, "cd": 5}}, "1-1-2": {"w": 1, "d": 1, "sl": "🌆 Tarde · 4 hrs", "ti": "Autograd: gradientes automáticos", "de": "requires_grad, .backward(), .grad. Descenso de gradiente manual en 2D.", "co": "PyTorch Autograd docs", "ct": "pr", "sk": {"dl": 20, "cd": 10}}, "1-2-1": {"w": 1, "d": 2, "sl": "🌅 Mañana · 4 hrs", "ti": "nn.Module: construir redes desde cero", "de": "nn.Linear, nn.ReLU, nn.Sigmoid, forward(). Red de 3 capas para clasificación.", "co": "Coursera — Deep Learning Specialization · Sem 1", "ct": "co", "sk": {"dl": 20, "cd": 10}}, "1-2-2": {"w": 1, "d": 2, "sl": "🌆 Tarde · 4 hrs", "ti": "Training loop: loss, optimizer, epochs", "de": "CrossEntropyLoss, MSELoss, Adam, SGD. Loop manual train/val. Monitorea val_loss.", "co": "Coursera — Deep Learning Specialization · Sem 2", "ct": "co", "sk": {"dl": 20, "cd": 10}}, "1-3-1": {"w": 1, "d": 3, "sl": "🌅 Mañana · 4 hrs", "ti": "DataLoader y Dataset custom", "de": "torch.utils.data.Dataset, DataLoader, batch_size, shuffle. Carga tu propio CSV.", "co": "PyTorch Docs · Data Loading Tutorial", "ct": "pr", "sk": {"dl": 15, "cd": 10}}, "1-3-2": {"w": 1, "d": 3, "sl": "🌆 Tarde · 4 hrs", "ti": "Regularización: Dropout, BatchNorm, L2", "de": "nn.Dropout, nn.BatchNorm1d, weight_decay. Reduce overfitting en red tabular.", "co": "LinkedIn — Deep Learning Foundations", "ct": "li", "sk": {"dl": 15, "cd": 5}}, "1-4-1": {"w": 1, "d": 4, "sl": "🌅 Mañana · 4 hrs", "ti": "CNN: Conv2d, MaxPool, arquitectura básica", "de": "nn.Conv2d, nn.MaxPool2d, flatten, fc. Clasificador MNIST desde cero.", "co": "Coursera — DL Specialization · CNN Sem 1", "ct": "co", "sk": {"dl": 20, "cd": 10}}, "1-4-2": {"w": 1, "d": 4, "sl": "🌆 Tarde · 4 hrs", "ti": "Transfer Learning: ResNet/EfficientNet pretrained", "de": "torchvision.models, freeze layers, fine-tune head. CIFAR-10 en <10 min.", "co": "LinkedIn — Transfer Learning with PyTorch", "ct": "li", "sk": {"dl": 20, "cd": 10}}, "1-5-1": {"w": 1, "d": 5, "sl": "🌅 Mañana · 4 hrs", "ti": "OpenCV: leer, transformar y filtrar imágenes", "de": "cv2.imread, resize, cvtColor, GaussianBlur, Canny. Pipeline de preprocesamiento.", "co": "pip install opencv-python · Docs oficiales", "ct": "pr", "sk": {"dl": 10, "cd": 10}}, "1-5-2": {"w": 1, "d": 5, "sl": "🌆 Tarde · 4 hrs", "ti": "YOLO: object detection en inferencia", "de": "Ultralytics YOLOv8: detección en imagen propia en <5 min. Bounding boxes.", "co": "pip install ultralytics · YOLOv8 Quickstart", "ct": "pr", "sk": {"dl": 15, "cd": 10}}, "1-6-1": {"w": 1, "d": 6, "sl": "🌅 Mañana · 4 hrs", "ti": "Proyecto CV: clasificador de documentos financieros", "de": "Fine-tune EfficientNet para clasificar: factura / estado de cuenta / contrato.", "co": "Proyecto portfolio · Visión Computacional", "ct": "pr", "sk": {"dl": 20, "cd": 15}}, "1-6-2": {"w": 1, "d": 6, "sl": "🌆 Tarde · 4 hrs", "ti": "Evaluar y mejorar el clasificador", "de": "Confusion matrix multiclase, class activation maps (Grad-CAM), data augmentation.", "co": "Proyecto portfolio · Evaluación CV", "ct": "pr", "sk": {"dl": 15, "vz": 10}}, "1-7-1": {"w": 1, "d": 7, "sl": "🌅 Mañana · 4 hrs", "ti": "Tensorboard: visualizar el entrenamiento", "de": "tensorboard --logdir=runs. Loss curves, histogramas de pesos, imágenes de muestra.", "co": "PyTorch Tensorboard tutorial", "ct": "pr", "sk": {"dl": 10, "cd": 5}}, "1-7-2": {"w": 1, "d": 7, "sl": "🌆 Tarde · 4 hrs", "ti": "Preview NLP: vocabulario y tipos de problemas", "de": "¿Qué es tokenización? ¿Qué es un embedding? Clasificación vs generación vs NER.", "co": "Towards Data Science · NLP intro 2025", "ct": "co", "sk": {"nlp": 5}}, "1-7-3": {"w": 1, "d": 7, "sl": "📱 Contenido · 30 min", "ti": "Post: \"Entrené mi primera red neuronal\"", "de": "Muestra la loss curve bajando. Accuracy final. Lo que te sorprendió.", "co": "LinkedIn", "ct": "pr", "sk": {"ct": 20}}, "2-1-1": {"w": 2, "d": 1, "sl": "🌅 Mañana · 4 hrs", "ti": "NLP: tokenización y limpieza de texto", "de": "NLTK: tokenize, stopwords, stemming. spaCy: modelo es_core_news_sm.", "co": "pip install nltk spacy · python -m spacy download es_core_news_sm", "ct": "pr", "sk": {"nlp": 15, "cd": 5}}, "2-1-2": {"w": 2, "d": 1, "sl": "🌆 Tarde · 4 hrs", "ti": "spaCy: NER, POS tagging, dependency parsing", "de": "ner, pos_, dep_, visualizer displacy. Extrae entidades de estados financieros.", "co": "spaCy docs · Advanced NLP", "ct": "li", "sk": {"nlp": 20, "cd": 10}}, "2-2-1": {"w": 2, "d": 2, "sl": "🌅 Mañana · 4 hrs", "ti": "Word embeddings: Word2Vec y GloVe", "de": "gensim Word2Vec. Semejanza coseno. \"banco\" cercano a \"financiero\". Visualiza con PCA.", "co": "pip install gensim · Word2Vec tutorial", "ct": "pr", "sk": {"nlp": 20, "cd": 10}}, "2-2-2": {"w": 2, "d": 2, "sl": "🌆 Tarde · 4 hrs", "ti": "Sentence embeddings: sentence-transformers", "de": "sentence-transformers: encode(), cosine_similarity. Búsqueda semántica básica.", "co": "pip install sentence-transformers", "ct": "pr", "sk": {"nlp": 20, "cd": 10}}, "2-3-1": {"w": 2, "d": 3, "sl": "🌅 Mañana · 4 hrs", "ti": "Hugging Face: pipelines y modelos preentrenados", "de": "pipeline(\"sentiment-analysis\"), pipeline(\"ner\"), pipeline(\"summarization\"). 3 líneas.", "co": "Hugging Face · Quickstart · pip install transformers", "ct": "li", "sk": {"nlp": 20, "cd": 5}}, "2-3-2": {"w": 2, "d": 3, "sl": "🌆 Tarde · 4 hrs", "ti": "Fine-tuning BERT para clasificación", "de": "AutoModelForSequenceClassification, Trainer API. Dataset de reseñas financieras.", "co": "Hugging Face · Fine-tuning tutorial", "ct": "co", "sk": {"nlp": 25, "dl": 10, "cd": 10}}, "2-4-1": {"w": 2, "d": 4, "sl": "🌅 Mañana · 4 hrs", "ti": "Dataset de NLP: scraping y preparación", "de": "BeautifulSoup, requests. Scraping de noticias financieras → dataset de sentimiento.", "co": "pip install beautifulsoup4 requests", "ct": "pr", "sk": {"nlp": 15, "cd": 15}}, "2-4-2": {"w": 2, "d": 4, "sl": "🌆 Tarde · 4 hrs", "ti": "Evaluación de modelos NLP", "de": "accuracy, F1 macro/micro, classification_report, confusion matrix multiclase.", "co": "Práctica propia", "ct": "pr", "sk": {"nlp": 10, "st": 10}}, "2-5-1": {"w": 2, "d": 5, "sl": "🌅 Mañana · 4 hrs", "ti": "Proyecto NLP: analizador de sentimiento financiero", "de": "Fine-tune DistilBERT en noticias de mercado. Predice positivo/negativo/neutral.", "co": "Proyecto portfolio · NLP Financiero", "ct": "pr", "sk": {"nlp": 25, "dl": 10, "cd": 15}}, "2-5-2": {"w": 2, "d": 5, "sl": "🌆 Tarde · 4 hrs", "ti": "Métricas avanzadas NLP: BLEU, ROUGE, BERTScore", "de": "Cuándo usar cada una. ROUGE para resumen, BERTScore para generación.", "co": "Práctica propia", "ct": "pr", "sk": {"nlp": 10, "st": 5}}, "2-6-1": {"w": 2, "d": 6, "sl": "🌅 Mañana · 4 hrs", "ti": "Text summarization con Hugging Face", "de": "pipeline(\"summarization\") con BART/T5. Summariza reportes anuales de empresas.", "co": "Hugging Face · Summarization", "ct": "pr", "sk": {"nlp": 20, "cd": 10}}, "2-6-2": {"w": 2, "d": 6, "sl": "🌆 Tarde · 4 hrs", "ti": "Named Entity Recognition en documentos financieros", "de": "spaCy + modelo financiero. Extrae: empresas, montos, fechas, porcentajes.", "co": "spaCy · NER financiero", "ct": "pr", "sk": {"nlp": 20, "cd": 10}}, "2-7-1": {"w": 2, "d": 7, "sl": "🌅 Mañana · 4 hrs", "ti": "Notebook final del proyecto NLP", "de": "Intro, dataset, modelo, métricas, ejemplos de predicción correcta/incorrecta.", "co": "Proyecto portfolio · Documentación", "ct": "pr", "sk": {"cd": 15, "ct": 10}}, "2-7-2": {"w": 2, "d": 7, "sl": "🌆 Tarde · 4 hrs", "ti": "Push a GitHub + README en inglés", "de": "Estructura profesional. Demo examples en el README.", "co": "GitHub", "ct": "pr", "sk": {"gt": 15, "ct": 15}}, "2-7-3": {"w": 2, "d": 7, "sl": "📱 Contenido · 30 min", "ti": "Post: \"Analicé sentimiento en noticias financieras\"", "de": "Muestra ejemplos de predicciones. F1 obtenido. Insight más interesante.", "co": "LinkedIn + GitHub", "ct": "pr", "sk": {"ct": 20}}, "3-1-1": {"w": 3, "d": 1, "sl": "🌅 Mañana · 4 hrs", "ti": "Hugging Face Hub: explorar y descargar modelos", "de": "Model cards, tasks, datasets, spaces. from_pretrained(). Catálogo de modelos financieros.", "co": "huggingface.co · Model Hub", "ct": "pr", "sk": {"nlp": 10, "llm": 5}}, "3-1-2": {"w": 3, "d": 1, "sl": "🌆 Tarde · 4 hrs", "ti": "Transformers: arquitectura attention (conceptual)", "de": "Self-attention, multi-head attention, positional encoding. No código — intuición.", "co": "Ilustrated Transformer · Jay Alammar", "ct": "co", "sk": {"nlp": 15, "dl": 10}}, "3-2-1": {"w": 3, "d": 2, "sl": "🌅 Mañana · 4 hrs", "ti": "Zero-shot y few-shot con modelos de HF", "de": "pipeline(\"zero-shot-classification\"). Clasifica sin entrenamiento. Compara con fine-tuned.", "co": "Hugging Face · Zero-shot tutorial", "ct": "pr", "sk": {"nlp": 15, "llm": 10}}, "3-2-2": {"w": 3, "d": 2, "sl": "🌆 Tarde · 4 hrs", "ti": "Text generation: GPT-2 y BLOOM locales", "de": "pipeline(\"text-generation\"). Temperatura, top_k, top_p. Genera análisis de riesgo.", "co": "Hugging Face · Text Generation", "ct": "pr", "sk": {"nlp": 10, "llm": 15, "cd": 10}}, "3-3-1": {"w": 3, "d": 3, "sl": "🌅 Mañana · 4 hrs", "ti": "Speech-to-text: Whisper local", "de": "pip install openai-whisper. Transcribe reuniones de auditoría. Muy demandado freelance.", "co": "OpenAI Whisper · GitHub", "ct": "pr", "sk": {"nlp": 15, "llm": 10, "cd": 10}}, "3-3-2": {"w": 3, "d": 3, "sl": "🌆 Tarde · 4 hrs", "ti": "Image captioning y multimodal", "de": "CLIP, BLIP: imagen → texto. Aplica en documentos escaneados con imágenes.", "co": "Hugging Face · Multimodal", "ct": "pr", "sk": {"nlp": 10, "dl": 10, "llm": 5}}, "3-4-1": {"w": 3, "d": 4, "sl": "🌅 Mañana · 4 hrs", "ti": "Gradio: demo rápido de tu modelo NLP", "de": "gr.Interface, gr.Blocks. Demo público en 10 minutos. Link compartible.", "co": "pip install gradio · Quickstart", "ct": "pr", "sk": {"nlp": 10, "cd": 15, "ct": 10}}, "3-4-2": {"w": 3, "d": 4, "sl": "🌆 Tarde · 4 hrs", "ti": "Streamlit: primer app del analizador de sentimiento", "de": "st.title, st.text_input, st.button, st.write. App pública con Streamlit Cloud.", "co": "pip install streamlit · Streamlit Cloud gratis", "ct": "pr", "sk": {"cd": 20, "ct": 10}}, "3-5-1": {"w": 3, "d": 5, "sl": "🌅 Mañana · 4 hrs", "ti": "Optimizar inferencia: quantization y ONNX", "de": "torch.quantization, optimum, onnxruntime. Modelo 4x más rápido para producción.", "co": "Hugging Face Optimum · pip install optimum", "ct": "pr", "sk": {"ops": 10, "nlp": 10, "cd": 10}}, "3-5-2": {"w": 3, "d": 5, "sl": "🌆 Tarde · 4 hrs", "ti": "Proyecto final Mes 3: demo público de NLP", "de": "Streamlit app de análisis de sentimiento financiero publicada online.", "co": "Proyecto portfolio · Mes 3", "ct": "pr", "sk": {"nlp": 15, "cd": 20, "ct": 15}}, "3-6-1": {"w": 3, "d": 6, "sl": "🌅 Mañana · 4 hrs", "ti": "Portfolio: estructura y presentación profesional", "de": "Organiza GitHub con README central. 3 proyectos presentados con imágenes.", "co": "GitHub · Portfolio guide", "ct": "pr", "sk": {"gt": 15, "ct": 20}}, "3-6-2": {"w": 3, "d": 6, "sl": "🌆 Tarde · 4 hrs", "ti": "Freelance: servicios NLP en Upwork y Contra", "de": "Lee 30 jobs de NLP/ML. Define tu servicio: \"Análisis de sentimiento en reportes\".", "co": "Upwork + Contra + Freelancer", "ct": "pr", "sk": {"ct": 20}}, "3-7-1": {"w": 3, "d": 7, "sl": "🌅 Mañana · 4 hrs", "ti": "Retrospectiva mes 3 + plan mes 4 (LLMs)", "de": "¿Qué modelos dominaste? ¿Qué te costó trabajo? Ajusta tiempo estimado vs real.", "co": "Notion", "ct": "pr", "sk": {"ct": 10}}, "3-7-2": {"w": 3, "d": 7, "sl": "🌆 Tarde · 4 hrs", "ti": "Preview LLMs: instalar OpenAI SDK", "de": "pip install openai. Lee la documentación de GPT-4o. ¿Qué es function calling?", "co": "OpenAI Docs · Quickstart", "ct": "co", "sk": {"llm": 5, "cd": 5}}, "3-7-3": {"w": 3, "d": 7, "sl": "📱 Contenido · 30 min", "ti": "Post: \"Mes 3 completado: DL + NLP + App\"", "de": "App Streamlit pública. Modelos usados. Qué sigue (LLMs). Muestra el link.", "co": "LinkedIn + GitHub", "ct": "pr", "sk": {"ct": 25}}, "4-1-1": {"w": 4, "d": 1, "sl": "🌅 Mañana · 4 hrs", "ti": "Mejorar demo NLP con Features adicionales", "de": "Agrega: comparar múltiples textos, gráfica de confianza, exportar resultados.", "co": "Proyecto propio · Streamlit", "ct": "pr", "sk": {"cd": 20, "nlp": 10}}, "4-1-2": {"w": 4, "d": 1, "sl": "🌆 Tarde · 4 hrs", "ti": "Reducción de dimensionalidad: PCA, t-SNE, UMAP", "de": "Visualiza embeddings de sentences. Clusters semánticos en 2D.", "co": "pip install umap-learn", "ct": "pr", "sk": {"st": 15, "vz": 15, "nlp": 10}}, "4-2-1": {"w": 4, "d": 2, "sl": "🌅 Mañana · 4 hrs", "ti": "Anomaly detection con autoencoders", "de": "Encoder-decoder, reconstruction error, threshold. Detecta facturas fraudulentas.", "co": "Proyecto aplicado · Autoencoder", "ct": "pr", "sk": {"dl": 20, "ml": 10, "cd": 10}}, "4-2-2": {"w": 4, "d": 2, "sl": "🌆 Tarde · 4 hrs", "ti": "Redes recurrentes: LSTM para TS financieras", "de": "nn.LSTM, sequences, hidden state. Predice precio de cierre de acciones.", "co": "LinkedIn — Deep Learning: LSTM", "ct": "li", "sk": {"dl": 20, "ml": 10}}, "4-3-1": {"w": 4, "d": 3, "sl": "🌅 Mañana · 4 hrs", "ti": "Kaggle CV: competencia de imagen activa", "de": "Aplica transfer learning al leaderboard activo de CV. Target: top 40%.", "co": "Kaggle Competitions · CV", "ct": "pr", "sk": {"dl": 15, "cd": 10}}, "4-3-2": {"w": 4, "d": 3, "sl": "🌆 Tarde · 4 hrs", "ti": "Revisar top soluciones de Kaggle NLP", "de": "Lee 3 soluciones top de competencias NLP recientes. Técnicas para Mes 4.", "co": "Kaggle · NLP Competition solutions", "ct": "pr", "sk": {"nlp": 10, "llm": 5}}, "4-4-1": {"w": 4, "d": 4, "sl": "🌅 Mañana · 4 hrs", "ti": "Weights & Biases: tracking de experimentos", "de": "wandb.init(), wandb.log(), sweeps. Compara 10 experimentos en el dashboard.", "co": "pip install wandb · W&B Quickstart", "ct": "pr", "sk": {"ops": 15, "cd": 10}}, "4-4-2": {"w": 4, "d": 4, "sl": "🌆 Tarde · 4 hrs", "ti": "DVC: versioning de datos y modelos", "de": "dvc init, dvc add, dvc push. Versiona tu dataset de NLP como código.", "co": "pip install dvc · DVC Get Started", "ct": "pr", "sk": {"ops": 15, "gt": 10}}, "4-5-1": {"w": 4, "d": 5, "sl": "🌅 Mañana · 4 hrs", "ti": "GitHub Actions: primer CI para tests de modelo", "de": "workflow.yml, pytest, test que el modelo alcanza accuracy mínima.", "co": "GitHub Actions · Python CI tutorial", "ct": "pr", "sk": {"ops": 10, "gt": 15, "cd": 10}}, "4-5-2": {"w": 4, "d": 5, "sl": "🌆 Tarde · 4 hrs", "ti": "Push final + actualizar LinkedIn/Upwork", "de": "LinkedIn: DL, NLP, Streamlit como skills. Upwork: nuevo servicio de NLP.", "co": "GitHub + LinkedIn + Upwork", "ct": "pr", "sk": {"gt": 10, "ct": 20}}, "4-6-1": {"w": 4, "d": 6, "sl": "🌅 Mañana · 4 hrs", "ti": "Retrospectiva mes 3 completo", "de": "Tiempo real vs estimado. Skills adquiridos. Proyectos terminados. Próximos pasos.", "co": "Notion · Retrospective template", "ct": "pr", "sk": {"ct": 15}}, "4-6-2": {"w": 4, "d": 6, "sl": "🌆 Tarde · 4 hrs", "ti": "Instalar LangChain y OpenAI SDK", "de": "pip install langchain openai. Primera llamada a GPT-4o. Token counting.", "co": "OpenAI + LangChain docs", "ct": "pr", "sk": {"llm": 10, "cd": 5}}, "4-7-1": {"w": 4, "d": 7, "sl": "🌅 Mañana · 4 hrs", "ti": "Ordenar GitHub: 3 proyectos presentados", "de": "README central, gh-pages si aplica. Cada proyecto con imágenes en README.", "co": "GitHub", "ct": "pr", "sk": {"gt": 20, "ct": 10}}, "4-7-2": {"w": 4, "d": 7, "sl": "🌆 Tarde · 4 hrs", "ti": "Preview Mes 4: LLMs, RAG y apps de IA", "de": "¿Qué es RAG? ¿Qué es un agente? ¿Qué pagan en freelance por LLM integration?", "co": "Towards Data Science + Upwork research", "ct": "co", "sk": {"llm": 5}}, "4-7-3": {"w": 4, "d": 7, "sl": "📱 Contenido · 30 min", "ti": "Post retrospectiva mes 3", "de": "3 modelos construidos, 1 app publicada, skills de DL+NLP. Próximo: LLMs.", "co": "LinkedIn", "ct": "pr", "sk": {"ct": 25}}};
+const WEEK_THEMES = {"1": "PyTorch + Computer Vision", "2": "NLP: spaCy, Embeddings y BERT", "3": "Hugging Face + Apps Públicas", "4": "Proyecto Portfolio + MLOps Intro"};
+const WEEK_DELIVERABLES = {"1": "Clasificador de documentos financieros con EfficientNet en GitHub.", "2": "Analizador de sentimiento financiero fine-tuned (DistilBERT) + notebook.", "3": "App Streamlit pública de análisis de sentimiento con link compartible.", "4": "3 proyectos en GitHub + W&B + DVC + primer CI con GitHub Actions."};
+const DAY_THEMES = {"1": {"1": "PyTorch tensores + autograd", "2": "nn.Module + training loop", "3": "DataLoader + regularización", "4": "CNN + Transfer Learning", "5": "OpenCV + YOLO", "6": "Proyecto CV", "7": "Tensorboard + Preview NLP"}, "2": {"1": "Tokenización + spaCy", "2": "Word embeddings", "3": "Hugging Face pipelines", "4": "Dataset NLP + evaluación", "5": "Proyecto sentimiento", "6": "Summarization + NER", "7": "Notebook + GitHub"}, "3": {"1": "HF Hub + Attention", "2": "Zero-shot + Text gen", "3": "Whisper + Multimodal", "4": "Gradio + Streamlit", "5": "Optimización + App final", "6": "Portfolio + Freelance NLP", "7": "Retrospectiva + Preview LLMs"}, "4": {"1": "Streamlit mejorado", "2": "PCA/t-SNE + Autoencoder", "3": "LSTM + Kaggle CV", "4": "W&B + DVC", "5": "GitHub Actions + LinkedIn", "6": "Retrospectiva + LangChain", "7": "GitHub ordenado + Mes 4 preview"}};
+
+
+const SL_MAP = ['','🌅 Mañana · 4 hrs','🌆 Tarde · 4 hrs','📱 Contenido · 30 min'];
+const DN = {1:'Lunes',2:'Martes',3:'Miércoles',4:'Jueves',5:'Viernes',6:'Sábado',7:'Domingo'};
+
+// Skill maxes for THIS month only (for progress bars)
+const SK_MAX = {};
+Object.keys(TASKS).forEach(k=>{Object.keys(TASKS[k].sk).forEach(s=>{SK_MAX[s]=(SK_MAX[s]||0)+TASKS[k].sk[s];});});
+
+// Task weight
+const ALL_PTS = Object.values(TASKS).reduce((s,t)=>s+Object.values(t.sk).reduce((a,v)=>a+v,0),0);
+function taskWeight(k){return (Object.values(TASKS[k].sk).reduce((a,v)=>a+v,0)/ALL_PTS*100).toFixed(1);}
+function getEstMin(k){return k.endsWith('-3')?30:240;}
+function fmtEst(k){const m=getEstMin(k);return m>=60?(m/60)+'h est.':m+'min est.';}
+
+// Task state
+let state={};
+try{const s=localStorage.getItem(STORE);if(s)state=JSON.parse(s);}catch(e){}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(state));}catch(e){}}
+
+// Timer state
+let timerState={},activeTimer=null,timerTick=null;
+function loadTimers(){
+  try{const s=localStorage.getItem(TIMER_STORE);if(s)timerState=JSON.parse(s);}catch(e){}
+  Object.keys(timerState).forEach(k=>{if(timerState[k]&&timerState[k].startedAt){timerState[k].elapsed+=Math.floor((Date.now()-timerState[k].startedAt)/1000);timerState[k].startedAt=null;}});
+}
+function saveTimers(){try{localStorage.setItem(TIMER_STORE,JSON.stringify(timerState));}catch(e){}}
+function fmtSec(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;return h>0?h+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0'):m+':'+String(ss).padStart(2,'0');}
+function toggleTimer(k){
+  if(activeTimer&&activeTimer!==k)pauseTimer(activeTimer);
+  if(!timerState[k])timerState[k]={elapsed:0,startedAt:null};
+  if(timerState[k].startedAt){pauseTimer(k);}
+  else{timerState[k].startedAt=Date.now();activeTimer=k;clearInterval(timerTick);timerTick=setInterval(tickAll,1000);refreshTimerUI(k);}
+  saveTimers();
+}
+function pauseTimer(k){
+  if(timerState[k]&&timerState[k].startedAt){timerState[k].elapsed+=Math.floor((Date.now()-timerState[k].startedAt)/1000);timerState[k].startedAt=null;}
+  if(activeTimer===k){activeTimer=null;clearInterval(timerTick);}
+  refreshTimerUI(k);saveTimers();
+}
+function tickAll(){if(activeTimer)refreshTimerUI(activeTimer);}
+function refreshTimerUI(k){
+  const ts=timerState[k];if(!ts)return;
+  const running=!!ts.startedAt;
+  const elapsed=running?ts.elapsed+Math.floor((Date.now()-ts.startedAt)/1000):ts.elapsed;
+  const tel=document.getElementById('tel-'+k),tbtn=document.getElementById('tbtn-'+k),trow=document.getElementById('tr-'+k);
+  if(tel)tel.textContent=fmtSec(elapsed);
+  if(tbtn)tbtn.textContent=running?'⏸':'▶';
+  if(trow)trow.classList.toggle('timing',running);
+}
+function initTimers(){Object.keys(timerState).forEach(k=>{if((timerState[k].elapsed||0)>0)refreshTimerUI(k);});}
+
+function renderChecklist(){
+  const body=document.getElementById('checklist-body');body.innerHTML='';
+  for(let w=1;w<=4;w++){
+    const wdiv=document.createElement('div');wdiv.className='wcontent w'+w;wdiv.id='wc-'+w;
+    if(w===1)wdiv.classList.add('active');
+    const wsub=document.createElement('div');wsub.className='wsub';wsub.id='wsub-'+w;
+    wsub.textContent='0 de '+Object.keys(TASKS).filter(k=>TASKS[k].w===w).length+' tareas · 0%';
+    wdiv.appendChild(wsub);
+    for(let d=1;d<=7;d++){
+      const dayTasks=Object.keys(TASKS).filter(k=>TASKS[k].w===w&&TASKS[k].d===d);
+      if(!dayTasks.length)continue;
+      const card=document.createElement('div');card.className='day-card';
+      const hdr=document.createElement('div');hdr.className='day-hdr';
+      hdr.innerHTML='<span class="day-name">'+DN[d]+'</span><span class="day-theme">'+DAY_THEMES[w][d]+'</span><span class="day-badge" id="dbadge-'+w+'-'+d+'">0/'+dayTasks.length+'</span>';
+      card.appendChild(hdr);
+      dayTasks.forEach(k=>{
+        const t=TASKS[k];const isC=k.endsWith('-3');
+        const row=document.createElement('div');row.className='task-row'+(isC?' content-slot':'');row.id='tr-'+k;row.onclick=()=>toggle(k);
+        const pips=Object.keys(t.sk).map(s=>'<span class="skill-pip" style="background:'+SK_DEF[s].color+'20;color:'+SK_DEF[s].color+'">'+SK_DEF[s].icon+'+'+t.sk[s]+'</span>').join('');
+        row.innerHTML='<div class="task-check" id="tc-'+k+'"></div><div class="task-info"><div class="task-slot">'+t.sl+'</div><div class="task-title">'+t.ti+'</div><div class="task-desc">'+t.de+'</div><div class="task-meta"><span class="course-tag '+t.ct+'">'+t.co+'</span>'+pips+'</div><div class="task-timer"><span style="font-size:11px;font-family:monospace;color:#aaa">⏱ </span><span class="timer-real" id="tel-'+k+'">0:00</span><span class="timer-sep"> / </span><span class="timer-est">'+fmtEst(k)+'</span><button class="timer-btn" id="tbtn-'+k+'" >▶</button><span class="task-weight">'+taskWeight(k)+'%</span></div></div>';
+        card.appendChild(row);
+        row.querySelector('#tbtn-'+k).onclick=function(e){e.stopPropagation();toggleTimer(k);};
+      });
+      if(d===7){const deliv=document.createElement('div');deliv.className='deliv';deliv.innerHTML='<span>🏆</span><span><strong>Entregable S'+w+':</strong> '+WEEK_DELIVERABLES[w]+'</span>';card.appendChild(deliv);}
+      wdiv.appendChild(card);
+    }
+    body.appendChild(wdiv);
+  }
+  updateAll();
+}
+
+function renderGantt(){
+  const body=document.getElementById('gantt-body');body.innerHTML='';
+  for(let w=1;w<=4;w++){
+    const row=document.createElement('div');row.className='gantt-row';
+    const wl=document.createElement('div');wl.className='gantt-week-label';
+    wl.innerHTML='<strong>S'+w+'</strong><br><span style="font-size:10px;color:#999;font-weight:400">'+WEEK_THEMES[w]+'</span>';
+    row.appendChild(wl);
+    for(let d=1;d<=7;d++){
+      const cell=document.createElement('div');cell.className='gantt-cell';cell.id='gc-'+w+'-'+d;
+      const dt=Object.keys(TASKS).filter(k=>TASKS[k].w===w&&TASKS[k].d===d);
+      const estH=Math.round(dt.reduce((s,k)=>s+getEstMin(k),0)/60);
+      const dots=dt.map(k=>'<div class="gantt-dot'+(k.endsWith('-3')?' content':'')+'" id="gd-'+k+'"></div>').join('');
+      cell.innerHTML='<div style="font-size:9px;font-weight:700;color:#aaa">'+DN[d].slice(0,3)+'</div><div class="gantt-dots">'+dots+'</div><div class="gantt-pct" id="gpct-'+w+'-'+d+'">0%</div><div style="font-size:9px;color:#ccc">'+estH+'h</div><div class="gantt-time" id="gtime-'+w+'-'+d+'"></div>';
+      row.appendChild(cell);
+    }
+    body.appendChild(row);
+  }
+}
+
+function renderSkills(){
+  const body=document.getElementById('skills-body');body.innerHTML='';
+  Object.keys(SK_DEF).filter(s=>SK_MAX[s]).forEach(s=>{
+    const card=document.createElement('div');card.className='skill-card';
+    card.innerHTML='<div class="skill-top"><div class="skill-name" style="color:'+SK_DEF[s].color+'">'+SK_DEF[s].icon+' '+SK_DEF[s].label+'</div><div class="skill-pts" id="spts-'+s+'" style="color:'+SK_DEF[s].color+'">0/'+SK_MAX[s]+'pts</div></div><div class="skill-bar-outer"><div class="skill-bar-inner" id="sbar-'+s+'" style="width:0%;background:'+SK_DEF[s].color+'"></div></div><div class="skill-pct" id="spct-'+s+'">0%</div>';
+    body.appendChild(card);
+  });
+}
+
+function toggle(k){state[k]=!state[k];save();applyTask(k);updateAll();}
+function applyTask(k){
+  const done=!!state[k];
+  const tr=document.getElementById('tr-'+k),tc=document.getElementById('tc-'+k);
+  if(tr)tr.classList.toggle('done',done);
+  if(tc){tc.classList.toggle('done',done);tc.innerHTML=done?'✓':'';}
+  const gd=document.getElementById('gd-'+k);if(gd)gd.classList.toggle('done',done);
+}
+function updateAll(){
+  let gT=0,gD=0;const skP={};Object.keys(SK_DEF).forEach(s=>skP[s]=0);
+  Object.keys(TASKS).forEach(k=>{gT++;if(state[k]){gD++;Object.keys(TASKS[k].sk).forEach(s=>skP[s]=(skP[s]||0)+TASKS[k].sk[s]);}});
+  const gPct=gT?Math.round(gD/gT*100):0;
+  const gb=document.getElementById('gBar'),gp=document.getElementById('gPct');
+  if(gb)gb.style.width=gPct+'%';if(gp)gp.textContent=gPct+'%';
+  for(let w=1;w<=4;w++){
+    const wT=Object.keys(TASKS).filter(k=>TASKS[k].w===w);const wD=wT.filter(k=>state[k]).length;
+    const wsub=document.getElementById('wsub-'+w);
+    if(wsub)wsub.textContent=wD+' de '+wT.length+' tareas · '+Math.round(wD/wT.length*100)+'% completado';
+    for(let d=1;d<=7;d++){
+      const dT=Object.keys(TASKS).filter(k=>TASKS[k].w===w&&TASKS[k].d===d);if(!dT.length)continue;
+      const dD=dT.filter(k=>state[k]).length;
+      const badge=document.getElementById('dbadge-'+w+'-'+d);
+      if(badge){badge.textContent=dD+'/'+dT.length;badge.classList.toggle('all-done',dD===dT.length);}
+      const cell=document.getElementById('gc-'+w+'-'+d),pct=document.getElementById('gpct-'+w+'-'+d);
+      if(cell){cell.classList.remove('empty','partial','complete');if(dD===0)cell.classList.add('empty');else if(dD===dT.length)cell.classList.add('complete');else cell.classList.add('partial');}
+      if(pct)pct.textContent=Math.round(dD/dT.length*100)+'%';
+      const gt=document.getElementById('gtime-'+w+'-'+d);
+      if(gt){const tSec=dT.reduce((s,k)=>{const ts=timerState[k];return s+(ts?ts.elapsed+(ts.startedAt?Math.floor((Date.now()-ts.startedAt)/1000):0):0);},0);gt.textContent=tSec>0?'⏱'+fmtSec(tSec):'';}
+    }
+  }
+  Object.keys(SK_DEF).forEach(s=>{
+    const pts=skP[s]||0,max=SK_MAX[s]||1,pct=Math.round(pts/max*100);
+    const spts=document.getElementById('spts-'+s),sbar=document.getElementById('sbar-'+s),spct=document.getElementById('spct-'+s);
+    if(spts)spts.textContent=pts+'/'+max+'pts';if(sbar)sbar.style.width=pct+'%';if(spct)spct.textContent=pct+'%';
+  });
+}
+function showNav(id,el){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));document.getElementById('sec-'+id).classList.add('active');el.classList.add('active');}
+function showWeek(n,el){document.querySelectorAll('.wcontent').forEach(w=>w.classList.remove('active'));document.querySelectorAll('.wtab').forEach(t=>t.classList.remove('active'));const wc=document.getElementById('wc-'+n);if(wc)wc.classList.add('active');if(el)el.classList.add('active');}
+function resetAll(){if(!confirm('¿Reiniciar progreso de este mes? (Los tiempos se conservan)'))return;state={};save();Object.keys(TASKS).forEach(k=>applyTask(k));updateAll();}
+function downloadPlan(){
+  const totalMin=Object.keys(TASKS).reduce((s,k)=>s+getEstMin(k),0);
+  const W_COLORS={1:'#1a5fa8',2:'#1e6b2a',3:'#a85500',4:'#6622cc'};
+  let h='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Plan '+MONTH_TITLE+'</title><style>body{font-family:-apple-system,sans-serif;max-width:800px;margin:0 auto;padding:20px;font-size:13px;color:#1a1a1a}h1{font-size:18px;color:#1a5fa8;border-bottom:3px solid #1a5fa8;padding-bottom:8px;margin-bottom:14px}.summary{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.stat{background:#f0f6ff;border-radius:8px;padding:8px 14px;text-align:center}.stat-n{font-size:18px;font-weight:800;color:#1a5fa8}.stat-l{font-size:10px;color:#888}h2{font-size:14px;font-weight:700;margin:16px 0 6px;padding:6px 10px;border-radius:7px;color:#fff}.day-title{font-size:12px;font-weight:700;background:#f7f8fa;padding:5px 10px;border-radius:6px;margin:8px 0 4px;display:flex;justify-content:space-between}.slot-block{margin-bottom:4px;border:1px solid #f0f0f0;border-radius:7px;overflow:hidden}.slot-header{padding:4px 10px;background:#f7f8fa;font-size:10px;font-weight:700;color:#888;text-transform:uppercase}.task-block{padding:7px 10px;border-top:1px solid #f5f5f5}.task-name{font-size:12px;font-weight:600}.task-name.done{text-decoration:line-through;color:#aaa}.task-desc{font-size:11px;color:#666;margin:2px 0 0 20px}.task-meta-line{font-size:10px;color:#aaa;margin:2px 0 0 20px}.deliv{margin-top:6px;padding:5px 10px;background:#fffbf0;border:1px solid #f5d090;border-radius:6px;font-size:11px;color:#7a5800}@media print{.slot-block{break-inside:avoid}}</style></head><body>';
+  h+='<h1>🎯 '+MONTH_TITLE+'</h1><div class="summary"><div class="stat"><div class="stat-n">'+Object.keys(TASKS).length+'</div><div class="stat-l">Tareas</div></div><div class="stat"><div class="stat-n">'+Math.round(totalMin/60)+'h</div><div class="stat-l">Horas est.</div></div><div class="stat"><div class="stat-n">4</div><div class="stat-l">Semanas</div></div><div class="stat"><div class="stat-n">'+Object.keys(TASKS).filter(k=>state[k]).length+'/'+Object.keys(TASKS).length+'</div><div class="stat-l">Completadas</div></div></div>';
+  for(let w=1;w<=4;w++){
+    h+='<h2 style="background:'+W_COLORS[w]+'">Semana '+w+' — '+WEEK_THEMES[w]+'</h2>';
+    for(let d=1;d<=7;d++){
+      const dT=Object.keys(TASKS).filter(k=>TASKS[k].w===w&&TASKS[k].d===d);if(!dT.length)continue;
+      const dMin=dT.reduce((s,k)=>s+getEstMin(k),0);const dD=dT.filter(k=>state[k]).length;
+      const dSec=dT.reduce((s,k)=>{const ts=timerState[k];return s+(ts?ts.elapsed:0);},0);
+      h+='<div class="day-title"><span>'+DN[d]+' — '+DAY_THEMES[w][d]+'</span><span style="font-weight:400;color:#aaa">'+Math.round(dMin/60)+'h · '+dD+'/'+dT.length+(dSec>0?' · ⏱'+fmtSec(dSec):'')+'</span></div>';
+      for(let sl=1;sl<=3;sl++){
+        const slT=dT.filter(k=>parseInt(k.split('-')[2])===sl);if(!slT.length)continue;
+        const slL=['','🌅 Mañana (8:00-12:00 · 4h)','🌆 Tarde (13:00-17:00 · 4h)','📱 Contenido (17:00-17:30 · 30min)'][sl];
+        h+='<div class="slot-block"><div class="slot-header">'+slL+'</div>';
+        slT.forEach(k=>{
+          const t=TASKS[k];const done=!!state[k];const ts=timerState[k]||{elapsed:0};const wt=taskWeight(k);
+          const icon=done?'✅':'○';const cls=done?' done':'';const realT=ts.elapsed>0?' · real: '+fmtSec(ts.elapsed):'';
+          h+='<div class="task-block"><div>'+icon+'<span class="task-name'+cls+'">&nbsp;'+t.ti+'</span></div><div class="task-desc">'+t.de+'</div><div class="task-meta-line">📚 '+t.co+' · ⚖️ '+wt+'% del mes · ⏱ est: '+fmtEst(k)+realT+'</div></div>';
+        });
+        h+='</div>';
+      }
+      if(d===7)h+='<div class="deliv">🏆 <strong>Entregable S'+w+':</strong> '+WEEK_DELIVERABLES[w]+'</div>';
+    }
+  }
+  h+='<p style="margin-top:20px;font-size:10px;color:#ccc">Generado '+new Date().toLocaleDateString("es-MX")+' · '+MONTH_TITLE+'</p></body></html>';
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([h],{type:'text/html'}));a.download='plan_mes'+MONTH_NUM+'.html';document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+
+
+loadTimers();
+renderChecklist();
+renderGantt();
+renderSkills();
+Object.keys(TASKS).forEach(k=>applyTask(k));
+updateAll();
+initTimers();
+
+
+</script>
+<div class="section" id="sec-sq" style="padding:14px 18px 40px"><div style="font-size:12px;color:#aaa;margin-bottom:16px">Recursos gratuitos para complementar el mes. Ábrelos en una nueva pestaña y explora a tu ritmo 🚀</div><div class="sq-cat"><div class="sq-cat-title">🧠 Deep Learning</div><div class="sq-grid"><a class="sq-item" href="https://course.fast.ai" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">fast.ai — Practical DL Part 1</div><div class="sq-item-desc">El curso DL más práctico, gratis</div><div class="sq-item-link">course.fast.ai ↗</div></div></a><a class="sq-item" href="https://d2l.ai" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">d2l.ai</div><div class="sq-item-desc">Dive into Deep Learning — libro interactivo</div><div class="sq-item-link">d2l.ai ↗</div></div></a><a class="sq-item" href="https://cs231n.github.io" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">CS231n Stanford</div><div class="sq-item-desc">Notas y materiales del curso de CV de Stanford</div><div class="sq-item-link">cs231n.github.io ↗</div></div></a><a class="sq-item" href="https://youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">3Blue1Brown — Neural Nets</div><div class="sq-item-desc">La mejor explicación visual de redes neuronales</div><div class="sq-item-link">youtube.com ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">💬 NLP</div><div class="sq-grid"><a class="sq-item" href="https://huggingface.co/learn/nlp-course" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Hugging Face NLP Course</div><div class="sq-item-desc">Curso gratis oficial de HF — el estándar</div><div class="sq-item-link">huggingface.co ↗</div></div></a><a class="sq-item" href="https://web.stanford.edu/class/cs224n" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Stanford CS224N</div><div class="sq-item-desc">NLP con Deep Learning, materiales libres</div><div class="sq-item-link">web.stanford.edu ↗</div></div></a><a class="sq-item" href="https://course.spacy.io" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">spaCy Course</div><div class="sq-item-desc">NLP práctico con spaCy, gratis e interactivo</div><div class="sq-item-link">course.spacy.io ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">👁️ Computer Vision</div><div class="sq-grid"><a class="sq-item" href="https://blog.roboflow.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Roboflow Blog</div><div class="sq-item-desc">Tutoriales de CV y YOLO con código</div><div class="sq-item-link">blog.roboflow.com ↗</div></div></a><a class="sq-item" href="https://docs.opencv.org/4.x/d9/df8/tutorial_root.html" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">OpenCV Tutorials</div><div class="sq-item-desc">Documentación oficial con ejemplos</div><div class="sq-item-link">docs.opencv.org ↗</div></div></a><a class="sq-item" href="https://kaggle.com/learn/computer-vision" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Kaggle — Computer Vision</div><div class="sq-item-desc">Micro-curso de CV con PyTorch</div><div class="sq-item-link">kaggle.com ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">🚀 Apps y Deploy</div><div class="sq-grid"><a class="sq-item" href="https://streamlit.io/gallery" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Streamlit Gallery</div><div class="sq-item-desc">Inspírate con apps reales en producción</div><div class="sq-item-link">streamlit.io ↗</div></div></a><a class="sq-item" href="https://huggingface.co/spaces" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Gradio Demos</div><div class="sq-item-desc">Miles de demos de IA gratis en HF Spaces</div><div class="sq-item-link">huggingface.co ↗</div></div></a><a class="sq-item" href="https://huggingface.co/spaces" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">HF Spaces</div><div class="sq-item-desc">Deploy gratis de tu app con Gradio/Streamlit</div><div class="sq-item-link">huggingface.co ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">💻 Práctica</div><div class="sq-grid"><a class="sq-item" href="https://kaggle.com/competitions?listOption=active" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Kaggle DL Competitions</div><div class="sq-item-desc">Compite con modelos reales</div><div class="sq-item-link">kaggle.com ↗</div></div></a><a class="sq-item" href="https://paperswithcode.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Papers With Code</div><div class="sq-item-desc">Papers + código reproducible de SOTA</div><div class="sq-item-link">paperswithcode.com ↗</div></div></a></div></div></div></body>
+</html>

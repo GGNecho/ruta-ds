@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes 4 — LLMs + RAG + Agentes + Prompt Engineering</title>
+<style>
+:root{color-scheme:light}*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f7f8fa;color:#1a1a1a;font-size:13px}
+.hdr{background:#fff;border-bottom:1px solid #e8e8e8;padding:10px 18px;position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hdr-left h1{font-size:14px;font-weight:700}.hdr-left .sub{font-size:11px;color:#888;margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.prog-bar{width:100px;height:7px;background:#eee;border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#1a5fa8,#2d8a40);border-radius:4px;transition:width .4s}
+.prog-pct{font-size:12px;font-weight:700;color:#1a5fa8;min-width:32px}
+.icon-btn{font-size:11px;color:#999;cursor:pointer;padding:4px 8px;border-radius:6px;border:1px solid #eee;background:#fff}
+.icon-btn:hover{color:#555;border-color:#ccc}
+.dl-btn{font-size:11px;font-weight:700;padding:5px 11px;background:#1a5fa8;color:#fff;border:none;border-radius:7px;cursor:pointer}
+.dl-btn:hover{background:#1550a0}
+.nav{display:flex;gap:4px;padding:10px 18px 0;background:#f7f8fa;border-bottom:1px solid #e8e8e8;position:sticky;top:57px;z-index:190;flex-wrap:wrap}
+.nav-tab{padding:6px 12px;border-radius:8px 8px 0 0;font-size:12px;font-weight:600;cursor:pointer;border:1px solid transparent;border-bottom:none;background:#eee;color:#666;transition:all .15s}
+.nav-tab.active{background:#fff;color:#1a1a1a;border-color:#e0e0e0}
+.section{display:none;padding:14px 18px 40px}.section.active{display:block}
+.wtabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
+.wtab{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #e0e0e0;background:#fff;color:#666;transition:all .15s}
+.wtab.active{background:#1a5fa8;color:#fff;border-color:#1a5fa8}
+.wcontent{display:none}.wcontent.active{display:block}
+.wsub{font-size:11px;color:#888;margin-bottom:12px}
+.day-card{background:#fff;border:1px solid #e8e8e8;border-radius:11px;margin-bottom:9px;overflow:hidden}
+.day-hdr{display:flex;align-items:center;padding:9px 13px;border-bottom:1px solid #f0f0f0;gap:10px}
+.day-name{font-weight:700;font-size:12px;min-width:78px}
+.day-theme{font-size:11px;color:#666;flex:1}
+.day-badge{font-size:10px;padding:2px 7px;border-radius:10px;background:#f0f0f0;color:#999;font-weight:600}
+.day-badge.all-done{background:#e0f5e8;color:#1e7a30}
+.task-row{display:flex;align-items:flex-start;padding:8px 13px;gap:9px;border-bottom:1px solid #f5f5f5;cursor:pointer;transition:background .1s}
+.task-row:last-of-type{border-bottom:none}.task-row:hover{background:#fafafa}.task-row.timing{background:#fffbf0!important}
+.task-check{width:17px;height:17px;border-radius:4px;border:2px solid #ccc;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;transition:all .15s}
+.task-check.done{background:#2d8a40;border-color:#2d8a40}
+.task-info{flex:1;min-width:0}
+.task-slot{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#aaa;margin-bottom:2px}
+.task-title{font-size:12px;font-weight:600;line-height:1.4}
+.task-row.done .task-title{color:#bbb;text-decoration:line-through}
+.task-desc{font-size:11px;color:#888;line-height:1.4;margin-top:2px}
+.task-row.done .task-desc{color:#ccc}
+.task-meta{display:flex;align-items:center;gap:5px;margin-top:4px;flex-wrap:wrap}
+.course-tag{font-size:10px;padding:2px 7px;border-radius:5px;font-weight:500}
+.co{background:#e8f0ff;color:#0056d3}.li{background:#e8f2ff;color:#0a66c2}.pr{background:#e8fff0;color:#1e7a30}
+.skill-pip{font-size:9px;padding:1px 5px;border-radius:4px;font-weight:600;opacity:.8}
+.task-timer{display:flex;align-items:center;gap:7px;margin-top:6px;padding-top:6px;border-top:1px dashed #efefef}
+.timer-real{font-size:11px;font-family:monospace;font-weight:700;color:#1a5fa8;min-width:42px}
+.task-row.timing .timer-real{color:#c06020}
+.timer-sep,.timer-est{font-size:11px;color:#aaa;font-family:monospace}
+.timer-btn{width:22px;height:22px;border-radius:5px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:11px;padding:0;flex-shrink:0}
+.timer-btn:hover{border-color:#1a5fa8}
+.task-row.timing .timer-btn{border-color:#c06020;background:#fff8f0}
+.task-weight{font-size:9px;padding:1px 6px;border-radius:10px;background:#f5f5f5;color:#aaa;font-weight:700;margin-left:auto;white-space:nowrap}
+.deliv{margin:0 13px 11px;padding:7px 10px;background:#fffbf0;border:1px solid #f5e090;border-radius:7px;font-size:11px;color:#7a5800;display:flex;align-items:center;gap:6px}
+.task-row.content-slot{background:#fdf8ff}.task-row.content-slot:hover{background:#f8f0ff}
+.gantt-wrap{overflow-x:auto}
+.gantt{min-width:560px}
+.gantt-hdr{display:grid;grid-template-columns:80px repeat(7,1fr);gap:3px;margin-bottom:4px}
+.gantt-hdr-cell{text-align:center;font-size:10px;font-weight:700;color:#888;padding:4px}
+.gantt-row{display:grid;grid-template-columns:80px repeat(7,1fr);gap:3px;margin-bottom:3px}
+.gantt-week-label{font-size:11px;font-weight:700;color:#555;padding:4px 6px}
+.gantt-cell{border-radius:8px;padding:6px 4px;text-align:center;border:1px solid #e8e8e8;background:#fff;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.gantt-cell.empty{background:#f7f8fa}.gantt-cell.partial{background:#fff8e8;border-color:#f5d890}.gantt-cell.complete{background:#e8f8ec;border-color:#8dd4a0}
+.gantt-dots{display:flex;gap:3px;justify-content:center}
+.gantt-dot{width:7px;height:7px;border-radius:50%;background:#ddd}.gantt-dot.done{background:#2d8a40}.gantt-dot.content{background:#7c3aed}
+.gantt-pct{font-size:9px;color:#aaa;font-weight:600}.gantt-cell.complete .gantt-pct{color:#2d8a40}
+.gantt-time{font-size:9px;color:#c06020;font-family:monospace;font-weight:600}
+.gantt-legend{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#666}
+.legend-box{width:14px;height:14px;border-radius:4px}
+.skills-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:500px){.skills-grid{grid-template-columns:1fr}}
+.skill-card{background:#fff;border:1px solid #e8e8e8;border-radius:11px;padding:13px}
+.skill-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.skill-name{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+.skill-pts{font-size:11px;font-weight:700}
+.skill-bar-outer{height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden;margin-bottom:4px}
+.skill-bar-inner{height:100%;border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.skill-pct{font-size:10px;color:#aaa}
+.w1 .day-name{color:#1a5fa8}.w2 .day-name{color:#1e6b2a}.w3 .day-name{color:#a85500}.w4 .day-name{color:#6622cc}
+
+.sq-cat{margin-bottom:18px}
+.sq-cat-title{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.sq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+.sq-item{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:12px 14px;text-decoration:none;display:flex;align-items:flex-start;gap:10px;transition:border-color .15s,transform .1s}
+.sq-item:hover{border-color:#1a5fa8;transform:translateY(-1px)}
+.sq-item-icon{font-size:20px;flex-shrink:0;margin-top:1px}
+.sq-item-name{font-size:12px;font-weight:700;color:#1a1a1a;margin-bottom:2px}
+.sq-item-desc{font-size:11px;color:#888;line-height:1.4}
+.sq-item-link{font-size:10px;color:#1a5fa8;margin-top:3px}
+
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-left">
+    <h1 style="color:#8e44ad">📅 Mes 4 — LLMs + RAG + Agentes + Prompt Engineering</h1>
+    <div class="sub">OpenAI · LangChain · LlamaIndex · ChromaDB · RAG · CrewAI · n8n · Ollama</div>
+  </div>
+  <div class="hdr-right">
+    <button class="dl-btn" onclick="downloadPlan()">📥 Plan</button>
+    <div class="prog-bar"><div class="prog-fill" id="gBar" style="width:0%"></div></div>
+    <div class="prog-pct" id="gPct">0%</div>
+    <button class="icon-btn" onclick="resetAll()">↺</button><button id="fbBtn" onclick="" style="font-size:11px;padding:5px 10px;border-radius:7px;border:1px solid #ddd;cursor:pointer;background:#fff;color:#555">☁️ Sync</button>
+  </div>
+</div>
+
+<div style="background:#fff;border-bottom:1px solid #e8e8e8;padding:8px 18px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+  <span style="font-size:11px;color:#aaa">Ir a:</span>
+  <a href="mes1.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">Mes 1</a> <a href="mes2.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">Mes 2</a> <a href="mes3.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">Mes 3</a> <a href="mes4.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#1a5fa8;color:#fff">Mes 4</a> <a href="mes5.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">Mes 5</a> <a href="mes6.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">Mes 6</a>
+  <a href="gantt.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">📅 Gantt Global</a>
+  <a href="skills.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">⚡ Skills</a>
+  <a href="index.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">🏠 Inicio</a>
+</div>
+
+<div class="nav">
+  <div class="nav-tab active" onclick="showNav('checklist',this)">📋 Checklist</div>
+  <div class="nav-tab" onclick="showNav('gantt',this)">📅 Gantt</div>
+  <div class="nav-tab" onclick="showNav('skills',this)">⚡ Skills</div>
+  <div class="nav-tab" onclick="showNav('sq',this)">🎯 Side Quests</div>
+</div>
+
+<div class="section active" id="sec-checklist">
+  <div class="wtabs">
+    <div class="wtab active" onclick="showWeek(1,this)">Semana 1</div>
+    <div class="wtab" onclick="showWeek(2,this)">Semana 2</div>
+    <div class="wtab" onclick="showWeek(3,this)">Semana 3</div>
+    <div class="wtab" onclick="showWeek(4,this)">Semana 4</div>
+  </div>
+  <div id="checklist-body"></div>
+</div>
+
+<div class="section" id="sec-gantt">
+  <div class="gantt-wrap">
+    <div class="gantt">
+      <div class="gantt-hdr"><div class="gantt-hdr-cell"></div><div class="gantt-hdr-cell">Lun</div><div class="gantt-hdr-cell">Mar</div><div class="gantt-hdr-cell">Mié</div><div class="gantt-hdr-cell">Jue</div><div class="gantt-hdr-cell">Vie</div><div class="gantt-hdr-cell">Sáb</div><div class="gantt-hdr-cell">Dom</div></div>
+      <div id="gantt-body"></div>
+    </div>
+    <div class="gantt-legend">
+      <div class="legend-item"><div class="legend-box" style="background:#f7f8fa;border:1px solid #e8e8e8"></div>Sin iniciar</div>
+      <div class="legend-item"><div class="legend-box" style="background:#fff8e8;border:1px solid #f5d890"></div>En progreso</div>
+      <div class="legend-item"><div class="legend-box" style="background:#e8f8ec;border:1px solid #8dd4a0"></div>Completo</div>
+      <div class="legend-item"><div class="gantt-dot done" style="margin:0"></div>Tarea</div>
+      <div class="legend-item"><div class="gantt-dot content" style="margin:0"></div>Contenido</div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="sec-skills">
+  <div class="skills-grid" id="skills-body"></div>
+</div>
+
+<script>
+const MONTH_NUM = 4;
+const MONTH_TITLE = 'Mes 4 — LLMs + RAG + Agentes + Prompt Engineering';
+const STORE = 'ds_mes4_tasks';
+const TIMER_STORE = 'ds_mes4_timers';
+const SK_DEF = {"py": {"label": "Python", "icon": "🐍", "color": "#1a5fa8"}, "pd": {"label": "Pandas / NumPy", "icon": "🐼", "color": "#2d8a40"}, "sq": {"label": "SQL", "icon": "🗃️", "color": "#c06a00"}, "st": {"label": "Estadística", "icon": "📊", "color": "#7c3aed"}, "vz": {"label": "Visualización", "icon": "📈", "color": "#c0392b"}, "gt": {"label": "Git & GitHub", "icon": "⚙️", "color": "#156070"}, "ml": {"label": "Machine Learning", "icon": "🤖", "color": "#8b008b"}, "bi": {"label": "Power BI / Tableau", "icon": "📉", "color": "#d4850a"}, "dl": {"label": "Deep Learning", "icon": "🧠", "color": "#e74c3c"}, "nlp": {"label": "NLP / Texto", "icon": "💬", "color": "#16a085"}, "llm": {"label": "LLMs & GenAI", "icon": "✨", "color": "#8e44ad"}, "ops": {"label": "MLOps / Docker", "icon": "🔧", "color": "#2c3e50"}, "cl": {"label": "Cloud (AWS/GCP)", "icon": "☁️", "color": "#2980b9"}, "de": {"label": "Data Engineering", "icon": "⚡", "color": "#e67e22"}, "ct": {"label": "Portfolio / Contenido", "icon": "📝", "color": "#c05070"}, "cd": {"label": "Código / Proyectos", "icon": "💻", "color": "#444"}};
+const TASKS = {"1-1-1": {"w": 1, "d": 1, "sl": "🌅 Mañana · 4 hrs", "ti": "OpenAI API: completions y chat", "de": "openai.chat.completions.create(). system/user/assistant. Temperatura, max_tokens.", "co": "OpenAI Docs · Chat Completions", "ct": "pr", "sk": {"llm": 20, "cd": 10}}, "1-1-2": {"w": 1, "d": 1, "sl": "🌆 Tarde · 4 hrs", "ti": "OpenAI Embeddings: búsqueda semántica", "de": "text-embedding-3-small. cosine similarity sobre corpus de documentos financieros.", "co": "OpenAI Docs · Embeddings", "ct": "pr", "sk": {"llm": 20, "cd": 10}}, "1-2-1": {"w": 1, "d": 2, "sl": "🌅 Mañana · 4 hrs", "ti": "Function Calling: LLM como orquestador", "de": "tools=[{function_def}]. LLM decide cuándo llamar tu función Python. Extrae datos.", "co": "OpenAI Docs · Function Calling", "ct": "pr", "sk": {"llm": 25, "cd": 15}}, "1-2-2": {"w": 1, "d": 2, "sl": "🌆 Tarde · 4 hrs", "ti": "Vision API: GPT-4o con imágenes", "de": "Analiza estados financieros escaneados o gráficas. Input imagen base64.", "co": "OpenAI Docs · Vision", "ct": "pr", "sk": {"llm": 20, "cd": 10}}, "1-3-1": {"w": 1, "d": 3, "sl": "🌅 Mañana · 4 hrs", "ti": "Token management y cost optimization", "de": "tiktoken, context window limits, chunking strategies. Reduce costos 80%.", "co": "pip install tiktoken · OpenAI best practices", "ct": "pr", "sk": {"llm": 15, "cd": 10}}, "1-3-2": {"w": 1, "d": 3, "sl": "🌆 Tarde · 4 hrs", "ti": "LangChain: chains y prompt templates", "de": "LLMChain, PromptTemplate, ChatPromptTemplate. Encadena llamadas al LLM.", "co": "LangChain Docs · Quickstart · pip install langchain-openai", "ct": "li", "sk": {"llm": 20, "cd": 10}}, "1-4-1": {"w": 1, "d": 4, "sl": "🌅 Mañana · 4 hrs", "ti": "LangChain: memory y conversation history", "de": "ConversationBufferMemory, ConversationSummaryMemory. Chatbot que recuerda contexto.", "co": "LangChain Docs · Memory", "ct": "pr", "sk": {"llm": 20, "cd": 10}}, "1-4-2": {"w": 1, "d": 4, "sl": "🌆 Tarde · 4 hrs", "ti": "LangChain: Tools y Agents", "de": "Tool, AgentExecutor, ReAct agent. LLM que usa calculadora + búsqueda web.", "co": "LangChain Docs · Agents", "ct": "pr", "sk": {"llm": 25, "cd": 15}}, "1-5-1": {"w": 1, "d": 5, "sl": "🌅 Mañana · 4 hrs", "ti": "RAG Parte 1: chunking y embedding de documentos", "de": "RecursiveCharacterTextSplitter, OpenAIEmbeddings, FAISS. Indexa PDF financiero.", "co": "LangChain + FAISS · pip install faiss-cpu", "ct": "pr", "sk": {"llm": 25, "cd": 15}}, "1-5-2": {"w": 1, "d": 5, "sl": "🌆 Tarde · 4 hrs", "ti": "RAG Parte 2: retrieval y generación", "de": "FAISS.similarity_search(), RetrievalQA. Pregunta sobre tu PDF indexado.", "co": "LangChain · RetrievalQA", "ct": "pr", "sk": {"llm": 25, "cd": 15}}, "1-6-1": {"w": 1, "d": 6, "sl": "🌅 Mañana · 4 hrs", "ti": "ChromaDB: vector store persistente", "de": "pip install chromadb. Persist entre sesiones. Actualiza sin re-indexar todo.", "co": "pip install chromadb · Chroma docs", "ct": "pr", "sk": {"llm": 20, "cd": 10}}, "1-6-2": {"w": 1, "d": 6, "sl": "🌆 Tarde · 4 hrs", "ti": "LlamaIndex: alternativa a LangChain", "de": "pip install llama-index. VectorStoreIndex, QueryEngine. Más simple para RAG básico.", "co": "LlamaIndex docs · Quickstart", "ct": "pr", "sk": {"llm": 15, "cd": 10}}, "1-7-1": {"w": 1, "d": 7, "sl": "🌅 Mañana · 4 hrs", "ti": "Evaluación de RAG: RAGAs framework", "de": "pip install ragas. Context precision, recall, faithfulness, answer relevancy.", "co": "pip install ragas · RAGAs docs", "ct": "pr", "sk": {"llm": 15, "cd": 10}}, "1-7-2": {"w": 1, "d": 7, "sl": "🌆 Tarde · 4 hrs", "ti": "Preview: Streamlit app de RAG", "de": "Diseña el layout del chatbot de documentos financieros que construirás S2.", "co": "Streamlit · ChatGPT clone tutorial", "ct": "co", "sk": {"llm": 5, "cd": 5}}, "1-7-3": {"w": 1, "d": 7, "sl": "📱 Contenido · 30 min", "ti": "Post: \"Construí RAG sobre reportes financieros\"", "de": "Demo del chatbot respondiendo preguntas. Comparte el proceso de construcción.", "co": "LinkedIn", "ct": "pr", "sk": {"ct": 20}}, "2-1-1": {"w": 2, "d": 1, "sl": "🌅 Mañana · 4 hrs", "ti": "Streamlit ChatUI: interfaz de chatbot", "de": "st.chat_message, st.chat_input, session_state. Chat completo en 50 líneas.", "co": "Streamlit · Chat elements docs", "ct": "pr", "sk": {"llm": 15, "cd": 20}}, "2-1-2": {"w": 2, "d": 1, "sl": "🌆 Tarde · 4 hrs", "ti": "App RAG completa: chatbot de documentos", "de": "Integra ChromaDB + OpenAI + Streamlit. Sube PDF → pregunta sobre él.", "co": "Proyecto portfolio · RAG App · Mes 4", "ct": "pr", "sk": {"llm": 25, "cd": 20}}, "2-2-1": {"w": 2, "d": 2, "sl": "🌅 Mañana · 4 hrs", "ti": "Gradio: demo rápido de LLM app", "de": "gr.ChatInterface. Deploy en Hugging Face Spaces (gratis). Link público.", "co": "pip install gradio · Spaces docs", "ct": "pr", "sk": {"llm": 10, "cd": 15, "ct": 10}}, "2-2-2": {"w": 2, "d": 2, "sl": "🌆 Tarde · 4 hrs", "ti": "Prompt Engineering: técnicas avanzadas", "de": "Chain-of-thought, few-shot, meta-prompting, role prompting. Evalúa con rubrica.", "co": "Anthropic + OpenAI Prompt Engineering guides", "ct": "co", "sk": {"llm": 25, "cd": 5}}, "2-3-1": {"w": 2, "d": 3, "sl": "🌅 Mañana · 4 hrs", "ti": "Prompt Engineering: estructura de sistema", "de": "System prompts para: extractor de datos, analista financiero, revisor de contratos.", "co": "OpenAI Cookbook · System Prompts", "ct": "pr", "sk": {"llm": 20, "cd": 10}}, "2-3-2": {"w": 2, "d": 3, "sl": "🌆 Tarde · 4 hrs", "ti": "Structured outputs: Pydantic + OpenAI", "de": "response_format={\"type\":\"json_object\"}, Pydantic BaseModel. Outputs predecibles.", "co": "OpenAI Docs · Structured Outputs", "ct": "pr", "sk": {"llm": 20, "cd": 15}}, "2-4-1": {"w": 2, "d": 4, "sl": "🌅 Mañana · 4 hrs", "ti": "Fine-tuning con OpenAI API", "de": "Prepara JSONL, openai.FineTuningJob.create(). Cuándo vale el costo.", "co": "OpenAI Docs · Fine-tuning", "ct": "pr", "sk": {"llm": 20, "cd": 10}}, "2-4-2": {"w": 2, "d": 4, "sl": "🌆 Tarde · 4 hrs", "ti": "LoRA con Hugging Face PEFT", "de": "pip install peft. LoraConfig, get_peft_model. Fine-tune Llama en tu dataset.", "co": "Hugging Face PEFT · LoRA tutorial", "ct": "co", "sk": {"llm": 25, "dl": 10, "cd": 10}}, "2-5-1": {"w": 2, "d": 5, "sl": "🌅 Mañana · 4 hrs", "ti": "Ollama: LLMs locales sin API key", "de": "ollama pull llama3.2. Llama, Mistral, Qwen local. Sin costo por token.", "co": "ollama.ai · pip install ollama", "ct": "pr", "sk": {"llm": 20, "cd": 10}}, "2-5-2": {"w": 2, "d": 5, "sl": "🌆 Tarde · 4 hrs", "ti": "LangChain + Ollama: RAG sin OpenAI", "de": "Reemplaza OpenAI con Ollama en tu RAG app. Misma calidad, cero costo.", "co": "LangChain + Ollama integration", "ct": "pr", "sk": {"llm": 20, "cd": 15}}, "2-6-1": {"w": 2, "d": 6, "sl": "🌅 Mañana · 4 hrs", "ti": "n8n: automatización visual con LLMs", "de": "n8n + OpenAI node + Gmail/Notion/Slack. Workflow: email → resumen automático.", "co": "n8n.io · Free self-hosted o cloud", "ct": "pr", "sk": {"llm": 15, "cd": 15, "ops": 5}}, "2-6-2": {"w": 2, "d": 6, "sl": "🌆 Tarde · 4 hrs", "ti": "Automatización: extracción de datos de facturas", "de": "LLM + structured outputs → extrae proveedor, monto, fecha de cualquier factura PDF.", "co": "Proyecto aplicado · Automatización contable", "ct": "pr", "sk": {"llm": 25, "cd": 15}}, "2-7-1": {"w": 2, "d": 7, "sl": "🌅 Mañana · 4 hrs", "ti": "Notebook final + docs del proyecto LLM", "de": "Arquitectura, decisiones técnicas, costos, métricas de RAGAs.", "co": "Proyecto portfolio · Documentación", "ct": "pr", "sk": {"cd": 15, "ct": 10}}, "2-7-2": {"w": 2, "d": 7, "sl": "🌆 Tarde · 4 hrs", "ti": "Deploy en Streamlit Cloud o HF Spaces", "de": "streamlit.io/cloud: conecta GitHub → deploy automático. O HF Spaces.", "co": "Streamlit Cloud · Hugging Face Spaces", "ct": "pr", "sk": {"llm": 10, "ops": 10, "ct": 15}}, "2-7-3": {"w": 2, "d": 7, "sl": "📱 Contenido · 30 min", "ti": "Post: \"Construí un asistente financiero con RAG\"", "de": "App pública. Cómo funciona RAG en 3 pasos. Preguntas de ejemplo.", "co": "LinkedIn + GitHub", "ct": "pr", "sk": {"ct": 25}}, "3-1-1": {"w": 3, "d": 1, "sl": "🌅 Mañana · 4 hrs", "ti": "LangChain Agents avanzados: tool use", "de": "Multiple tools: calculadora + SQL + búsqueda web. ReAct + Structured Output.", "co": "LangChain Docs · Tools · Advanced Agents", "ct": "pr", "sk": {"llm": 25, "cd": 15}}, "3-1-2": {"w": 3, "d": 1, "sl": "🌆 Tarde · 4 hrs", "ti": "LangGraph: agentes con estado y flujos", "de": "pip install langgraph. StateGraph, nodes, edges. Agente con memoria persistente.", "co": "LangGraph Docs · pip install langgraph", "ct": "pr", "sk": {"llm": 25, "cd": 15}}, "3-2-1": {"w": 3, "d": 2, "sl": "🌅 Mañana · 4 hrs", "ti": "SQL Agent: LLM que escribe y ejecuta SQL", "de": "LangChain SQLDatabaseToolkit. Pregunta en español → SQL → resultado.", "co": "LangChain · SQL Agent tutorial", "ct": "pr", "sk": {"llm": 20, "sq": 10, "cd": 15}}, "3-2-2": {"w": 3, "d": 2, "sl": "🌆 Tarde · 4 hrs", "ti": "Pinecone: vector DB en la nube", "de": "pip install pinecone. Serverless, escalable, rápido. Migra tu ChromaDB.", "co": "Pinecone Docs · Quickstart (free tier)", "ct": "pr", "sk": {"llm": 15, "cd": 10}}, "3-3-1": {"w": 3, "d": 3, "sl": "🌅 Mañana · 4 hrs", "ti": "Agente de análisis financiero completo", "de": "Herramientas: yfinance + SQL + calculadora + RAG docs. Pregunta → análisis.", "co": "Proyecto portfolio · Agente Financiero", "ct": "pr", "sk": {"llm": 30, "cd": 20, "sq": 5}}, "3-3-2": {"w": 3, "d": 3, "sl": "🌆 Tarde · 4 hrs", "ti": "Evaluación de agentes: ¿cómo medir calidad?", "de": "LangSmith, Promptfoo, evaluación manual con rubrica. Logs de tool calls.", "co": "LangSmith Docs · Evaluations", "ct": "pr", "sk": {"llm": 15, "cd": 10}}, "3-4-1": {"w": 3, "d": 4, "sl": "🌅 Mañana · 4 hrs", "ti": "Multiagentes: CrewAI framework", "de": "pip install crewai. Agent, Task, Crew. Sistema de 3 agentes: researcher+analyst+writer.", "co": "CrewAI Docs · pip install crewai", "ct": "pr", "sk": {"llm": 25, "cd": 15}}, "3-4-2": {"w": 3, "d": 4, "sl": "🌆 Tarde · 4 hrs", "ti": "Integrar Notion/Slack/Gmail con LLMs", "de": "LangChain + APIs externas. Resumen automático de Slack → Notion.", "co": "LangChain Tools · External integrations", "ct": "pr", "sk": {"llm": 15, "cd": 15, "ops": 5}}, "3-5-1": {"w": 3, "d": 5, "sl": "🌅 Mañana · 4 hrs", "ti": "Anthropic Claude API: diferencias con OpenAI", "de": "pip install anthropic. System prompts, extended thinking. Cuándo usar Claude vs GPT.", "co": "Anthropic Docs · API Reference", "ct": "pr", "sk": {"llm": 15, "cd": 5}}, "3-5-2": {"w": 3, "d": 5, "sl": "🌆 Tarde · 4 hrs", "ti": "Comparativa de modelos: benchmarks reales", "de": "Compara GPT-4o vs Claude 3.5 vs Llama en tu tarea específica. Crea tu benchmark.", "co": "Evaluación propia + LMSYS Chatbot Arena", "ct": "pr", "sk": {"llm": 15, "cd": 10}}, "3-6-1": {"w": 3, "d": 6, "sl": "🌅 Mañana · 4 hrs", "ti": "Servicios freelance con LLMs: pricing y scoping", "de": "Define 3 servicios: (1) chatbot docs, (2) extractor datos, (3) automatización. Precios.", "co": "Upwork + Contra + investigación propia", "ct": "pr", "sk": {"ct": 25}}, "3-6-2": {"w": 3, "d": 6, "sl": "🌆 Tarde · 4 hrs", "ti": "Portfolio LLM: case study y propuesta", "de": "Escribe case study del agente financiero. ROI estimado para cliente.", "co": "Proyecto portfolio · Propuesta de valor", "ct": "pr", "sk": {"ct": 20}}, "3-7-1": {"w": 3, "d": 7, "sl": "🌅 Mañana · 4 hrs", "ti": "Proyecto final Mes 4: agente financiero publicado", "de": "App pública en Streamlit Cloud. Agente que analiza empresa dada su ticker.", "co": "Proyecto portfolio · Mes 4 Final", "ct": "pr", "sk": {"llm": 20, "cd": 15, "ct": 15}}, "3-7-2": {"w": 3, "d": 7, "sl": "🌆 Tarde · 4 hrs", "ti": "Retrospectiva mes 4 + plan mes 5 (MLOps)", "de": "Tiempo real vs estimado. ¿Cuánto gastaste en API? Tips para reducir costos.", "co": "Notion · Retrospective", "ct": "pr", "sk": {"ct": 15}}, "3-7-3": {"w": 3, "d": 7, "sl": "📱 Contenido · 30 min", "ti": "Post: \"Construí un agente de análisis financiero\"", "de": "Demo en video 60 seg. Arquitectura en imagen. Link al GitHub y app.", "co": "LinkedIn + YouTube Shorts", "ct": "pr", "sk": {"ct": 25}}, "4-1-1": {"w": 4, "d": 1, "sl": "🌅 Mañana · 4 hrs", "ti": "Portafolio completo: 4 proyectos presentados", "de": "Revisión de GitHub. Cada proyecto con README, imágenes, demo link, resultados.", "co": "GitHub · Portfolio review", "ct": "pr", "sk": {"gt": 15, "ct": 20}}, "4-1-2": {"w": 4, "d": 1, "sl": "🌆 Tarde · 4 hrs", "ti": "LinkedIn: optimización con keywords LLM/AI", "de": "Headline, about, featured projects. Keywords: RAG, LangChain, OpenAI, LLM.", "co": "LinkedIn · Profile optimization", "ct": "pr", "sk": {"ct": 20}}, "4-2-1": {"w": 4, "d": 2, "sl": "🌅 Mañana · 4 hrs", "ti": "Toptal: proceso de aplicación para DS/AI", "de": "Test de inglés, screening técnico, live coding. Qué preparar para cada fase.", "co": "Toptal.com · Application process", "ct": "pr", "sk": {"ct": 15}}, "4-2-2": {"w": 4, "d": 2, "sl": "🌆 Tarde · 4 hrs", "ti": "Propuesta tipo para cliente de Upwork", "de": "Template de propuesta: entendimiento del problema, approach, entregables, precio.", "co": "Upwork · Proposal templates", "ct": "pr", "sk": {"ct": 20}}, "4-3-1": {"w": 4, "d": 3, "sl": "🌅 Mañana · 4 hrs", "ti": "Pricing de servicios AI/ML en 2025", "de": "Tarifas reales: chatbots $500-5000, RAG $1500-10000, automatización $200-2000.", "co": "Investigación Upwork + Contra + LinkedIn", "ct": "pr", "sk": {"ct": 15}}, "4-3-2": {"w": 4, "d": 3, "sl": "🌆 Tarde · 4 hrs", "ti": "Cold outreach: contactar potenciales clientes", "de": "Mensaje de LinkedIn para accountants/CFOs que necesitan automatización.", "co": "Template de outreach + LinkedIn Sales Nav free", "ct": "pr", "sk": {"ct": 20}}, "4-4-1": {"w": 4, "d": 4, "sl": "🌅 Mañana · 4 hrs", "ti": "Instalar Docker Desktop y familiarizarse", "de": "docker run hello-world. Conceptos: image, container, volume, port.", "co": "Docker Desktop · docs.docker.com", "ct": "pr", "sk": {"ops": 10, "cd": 5}}, "4-4-2": {"w": 4, "d": 4, "sl": "🌆 Tarde · 4 hrs", "ti": "Preview FastAPI: servir un modelo como API", "de": "pip install fastapi uvicorn. GET/POST endpoints. Tu modelo de crédito como API.", "co": "FastAPI Docs · Tutorial", "ct": "co", "sk": {"ops": 10, "cd": 10}}, "4-5-1": {"w": 4, "d": 5, "sl": "🌅 Mañana · 4 hrs", "ti": "Retrospectiva mes 4 completo", "de": "Costos de API, proyectos, clientes potenciales contactados, tiempo real vs est.", "co": "Notion", "ct": "pr", "sk": {"ct": 15}}, "4-5-2": {"w": 4, "d": 5, "sl": "🌆 Tarde · 4 hrs", "ti": "Push de todos los proyectos LLM", "de": "Repositorio limpio. README central con links a todos los proyectos.", "co": "GitHub", "ct": "pr", "sk": {"gt": 15, "ct": 10}}, "4-6-1": {"w": 4, "d": 6, "sl": "🌅 Mañana · 4 hrs", "ti": "Aplicar a 5 jobs de DS/AI en LinkedIn/Indeed", "de": "Usar el CV + adaptar summary para LLM Engineer / AI Developer / DS.", "co": "LinkedIn Jobs + Indeed Remote", "ct": "pr", "sk": {"ct": 20}}, "4-6-2": {"w": 4, "d": 6, "sl": "🌆 Tarde · 4 hrs", "ti": "Pitch de 60 segundos: quién eres y qué construyes", "de": "Video o audio. Para entrevistas, networking, DMs. Ensaya 5 veces.", "co": "Práctica propia", "ct": "pr", "sk": {"ct": 15}}, "4-7-1": {"w": 4, "d": 7, "sl": "🌅 Mañana · 4 hrs", "ti": "Peer review: pide feedback de tu portfolio", "de": "Comparte GitHub con 2-3 personas del área. Anota feedback.", "co": "Reddit r/datascience + LinkedIn", "ct": "pr", "sk": {"ct": 15}}, "4-7-2": {"w": 4, "d": 7, "sl": "🌆 Tarde · 4 hrs", "ti": "Instalar herramientas Mes 5", "de": "pip install fastapi uvicorn mlflow dvc evidently. Verifica versiones.", "co": "Setup MLOps environment", "ct": "pr", "sk": {"ops": 5, "cd": 5}}, "4-7-3": {"w": 4, "d": 7, "sl": "📱 Contenido · 30 min", "ti": "Post: \"Mes 4 completado: LLMs y agentes de IA\"", "de": "4 meses de DS. App de RAG pública. Agente financiero. Próximo: MLOps.", "co": "LinkedIn + GitHub", "ct": "pr", "sk": {"ct": 25}}};
+const WEEK_THEMES = {"1": "OpenAI API, RAG y LangChain", "2": "Apps LLM y Prompt Engineering", "3": "Agentes, CrewAI y Freelance LLM", "4": "Portfolio y Transición a MLOps"};
+const WEEK_DELIVERABLES = {"1": "RAG app sobre documentos financieros con ChromaDB + Streamlit Cloud.", "2": "Chatbot RAG + extractor de facturas con structured outputs + n8n workflow.", "3": "Agente financiero multi-tool publicado + servicios freelance definidos.", "4": "Portfolio de 4 proyectos + 5 aplicaciones enviadas + setup MLOps listo."};
+const DAY_THEMES = {"1": {"1": "OpenAI API completions+embeddings", "2": "Function Calling + Vision API", "3": "Token management + LangChain chains", "4": "LangChain memory + Agents", "5": "RAG: chunking + retrieval", "6": "ChromaDB + LlamaIndex", "7": "RAGAs + Preview app"}, "2": {"1": "Streamlit ChatUI + RAG completo", "2": "Gradio + Prompt Engineering", "3": "System prompts + Structured outputs", "4": "Fine-tuning OpenAI + LoRA", "5": "Ollama local + RAG sin costo", "6": "n8n + extractor facturas", "7": "Docs + Deploy público"}, "3": {"1": "LangChain Agents avanzados + LangGraph", "2": "SQL Agent + Pinecone", "3": "Agente financiero completo", "4": "CrewAI + integraciones externas", "5": "Anthropic API + benchmarks", "6": "Servicios freelance + portfolio LLM", "7": "App final + retrospectiva"}, "4": {"1": "Portfolio review + LinkedIn", "2": "Toptal + propuesta Upwork", "3": "Pricing + cold outreach", "4": "Docker intro + FastAPI preview", "5": "Retrospectiva + GitHub push", "6": "Job applications + pitch", "7": "Peer review + setup Mes 5"}};
+
+
+const SL_MAP = ['','🌅 Mañana · 4 hrs','🌆 Tarde · 4 hrs','📱 Contenido · 30 min'];
+const DN = {1:'Lunes',2:'Martes',3:'Miércoles',4:'Jueves',5:'Viernes',6:'Sábado',7:'Domingo'};
+
+// Skill maxes for THIS month only (for progress bars)
+const SK_MAX = {};
+Object.keys(TASKS).forEach(k=>{Object.keys(TASKS[k].sk).forEach(s=>{SK_MAX[s]=(SK_MAX[s]||0)+TASKS[k].sk[s];});});
+
+// Task weight
+const ALL_PTS = Object.values(TASKS).reduce((s,t)=>s+Object.values(t.sk).reduce((a,v)=>a+v,0),0);
+function taskWeight(k){return (Object.values(TASKS[k].sk).reduce((a,v)=>a+v,0)/ALL_PTS*100).toFixed(1);}
+function getEstMin(k){return k.endsWith('-3')?30:240;}
+function fmtEst(k){const m=getEstMin(k);return m>=60?(m/60)+'h est.':m+'min est.';}
+
+// Task state
+let state={};
+try{const s=localStorage.getItem(STORE);if(s)state=JSON.parse(s);}catch(e){}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(state));}catch(e){}}
+
+// Timer state
+let timerState={},activeTimer=null,timerTick=null;
+function loadTimers(){
+  try{const s=localStorage.getItem(TIMER_STORE);if(s)timerState=JSON.parse(s);}catch(e){}
+  Object.keys(timerState).forEach(k=>{if(timerState[k]&&timerState[k].startedAt){timerState[k].elapsed+=Math.floor((Date.now()-timerState[k].startedAt)/1000);timerState[k].startedAt=null;}});
+}
+function saveTimers(){try{localStorage.setItem(TIMER_STORE,JSON.stringify(timerState));}catch(e){}}
+function fmtSec(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;return h>0?h+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0'):m+':'+String(ss).padStart(2,'0');}
+function toggleTimer(k){
+  if(activeTimer&&activeTimer!==k)pauseTimer(activeTimer);
+  if(!timerState[k])timerState[k]={elapsed:0,startedAt:null};
+  if(timerState[k].startedAt){pauseTimer(k);}
+  else{timerState[k].startedAt=Date.now();activeTimer=k;clearInterval(timerTick);timerTick=setInterval(tickAll,1000);refreshTimerUI(k);}
+  saveTimers();
+}
+function pauseTimer(k){
+  if(timerState[k]&&timerState[k].startedAt){timerState[k].elapsed+=Math.floor((Date.now()-timerState[k].startedAt)/1000);timerState[k].startedAt=null;}
+  if(activeTimer===k){activeTimer=null;clearInterval(timerTick);}
+  refreshTimerUI(k);saveTimers();
+}
+function tickAll(){if(activeTimer)refreshTimerUI(activeTimer);}
+function refreshTimerUI(k){
+  const ts=timerState[k];if(!ts)return;
+  const running=!!ts.startedAt;
+  const elapsed=running?ts.elapsed+Math.floor((Date.now()-ts.startedAt)/1000):ts.elapsed;
+  const tel=document.getElementById('tel-'+k),tbtn=document.getElementById('tbtn-'+k),trow=document.getElementById('tr-'+k);
+  if(tel)tel.textContent=fmtSec(elapsed);
+  if(tbtn)tbtn.textContent=running?'⏸':'▶';
+  if(trow)trow.classList.toggle('timing',running);
+}
+function initTimers(){Object.keys(timerState).forEach(k=>{if((timerState[k].elapsed||0)>0)refreshTimerUI(k);});}
+
+function renderChecklist(){
+  const body=document.getElementById('checklist-body');body.innerHTML='';
+  for(let w=1;w<=4;w++){
+    const wdiv=document.createElement('div');wdiv.className='wcontent w'+w;wdiv.id='wc-'+w;
+    if(w===1)wdiv.classList.add('active');
+    const wsub=document.createElement('div');wsub.className='wsub';wsub.id='wsub-'+w;
+    wsub.textContent='0 de '+Object.keys(TASKS).filter(k=>TASKS[k].w===w).length+' tareas · 0%';
+    wdiv.appendChild(wsub);
+    for(let d=1;d<=7;d++){
+      const dayTasks=Object.keys(TASKS).filter(k=>TASKS[k].w===w&&TASKS[k].d===d);
+      if(!dayTasks.length)continue;
+      const card=document.createElement('div');card.className='day-card';
+      const hdr=document.createElement('div');hdr.className='day-hdr';
+      hdr.innerHTML='<span class="day-name">'+DN[d]+'</span><span class="day-theme">'+DAY_THEMES[w][d]+'</span><span class="day-badge" id="dbadge-'+w+'-'+d+'">0/'+dayTasks.length+'</span>';
+      card.appendChild(hdr);
+      dayTasks.forEach(k=>{
+        const t=TASKS[k];const isC=k.endsWith('-3');
+        const row=document.createElement('div');row.className='task-row'+(isC?' content-slot':'');row.id='tr-'+k;row.onclick=()=>toggle(k);
+        const pips=Object.keys(t.sk).map(s=>'<span class="skill-pip" style="background:'+SK_DEF[s].color+'20;color:'+SK_DEF[s].color+'">'+SK_DEF[s].icon+'+'+t.sk[s]+'</span>').join('');
+        row.innerHTML='<div class="task-check" id="tc-'+k+'"></div><div class="task-info"><div class="task-slot">'+t.sl+'</div><div class="task-title">'+t.ti+'</div><div class="task-desc">'+t.de+'</div><div class="task-meta"><span class="course-tag '+t.ct+'">'+t.co+'</span>'+pips+'</div><div class="task-timer"><span style="font-size:11px;font-family:monospace;color:#aaa">⏱ </span><span class="timer-real" id="tel-'+k+'">0:00</span><span class="timer-sep"> / </span><span class="timer-est">'+fmtEst(k)+'</span><button class="timer-btn" id="tbtn-'+k+'" >▶</button><span class="task-weight">'+taskWeight(k)+'%</span></div></div>';
+        card.appendChild(row);
+        row.querySelector('#tbtn-'+k).onclick=function(e){e.stopPropagation();toggleTimer(k);};
+      });
+      if(d===7){const deliv=document.createElement('div');deliv.className='deliv';deliv.innerHTML='<span>🏆</span><span><strong>Entregable S'+w+':</strong> '+WEEK_DELIVERABLES[w]+'</span>';card.appendChild(deliv);}
+      wdiv.appendChild(card);
+    }
+    body.appendChild(wdiv);
+  }
+  updateAll();
+}
+
+function renderGantt(){
+  const body=document.getElementById('gantt-body');body.innerHTML='';
+  for(let w=1;w<=4;w++){
+    const row=document.createElement('div');row.className='gantt-row';
+    const wl=document.createElement('div');wl.className='gantt-week-label';
+    wl.innerHTML='<strong>S'+w+'</strong><br><span style="font-size:10px;color:#999;font-weight:400">'+WEEK_THEMES[w]+'</span>';
+    row.appendChild(wl);
+    for(let d=1;d<=7;d++){
+      const cell=document.createElement('div');cell.className='gantt-cell';cell.id='gc-'+w+'-'+d;
+      const dt=Object.keys(TASKS).filter(k=>TASKS[k].w===w&&TASKS[k].d===d);
+      const estH=Math.round(dt.reduce((s,k)=>s+getEstMin(k),0)/60);
+      const dots=dt.map(k=>'<div class="gantt-dot'+(k.endsWith('-3')?' content':'')+'" id="gd-'+k+'"></div>').join('');
+      cell.innerHTML='<div style="font-size:9px;font-weight:700;color:#aaa">'+DN[d].slice(0,3)+'</div><div class="gantt-dots">'+dots+'</div><div class="gantt-pct" id="gpct-'+w+'-'+d+'">0%</div><div style="font-size:9px;color:#ccc">'+estH+'h</div><div class="gantt-time" id="gtime-'+w+'-'+d+'"></div>';
+      row.appendChild(cell);
+    }
+    body.appendChild(row);
+  }
+}
+
+function renderSkills(){
+  const body=document.getElementById('skills-body');body.innerHTML='';
+  Object.keys(SK_DEF).filter(s=>SK_MAX[s]).forEach(s=>{
+    const card=document.createElement('div');card.className='skill-card';
+    card.innerHTML='<div class="skill-top"><div class="skill-name" style="color:'+SK_DEF[s].color+'">'+SK_DEF[s].icon+' '+SK_DEF[s].label+'</div><div class="skill-pts" id="spts-'+s+'" style="color:'+SK_DEF[s].color+'">0/'+SK_MAX[s]+'pts</div></div><div class="skill-bar-outer"><div class="skill-bar-inner" id="sbar-'+s+'" style="width:0%;background:'+SK_DEF[s].color+'"></div></div><div class="skill-pct" id="spct-'+s+'">0%</div>';
+    body.appendChild(card);
+  });
+}
+
+function toggle(k){state[k]=!state[k];save();applyTask(k);updateAll();}
+function applyTask(k){
+  const done=!!state[k];
+  const tr=document.getElementById('tr-'+k),tc=document.getElementById('tc-'+k);
+  if(tr)tr.classList.toggle('done',done);
+  if(tc){tc.classList.toggle('done',done);tc.innerHTML=done?'✓':'';}
+  const gd=document.getElementById('gd-'+k);if(gd)gd.classList.toggle('done',done);
+}
+function updateAll(){
+  let gT=0,gD=0;const skP={};Object.keys(SK_DEF).forEach(s=>skP[s]=0);
+  Object.keys(TASKS).forEach(k=>{gT++;if(state[k]){gD++;Object.keys(TASKS[k].sk).forEach(s=>skP[s]=(skP[s]||0)+TASKS[k].sk[s]);}});
+  const gPct=gT?Math.round(gD/gT*100):0;
+  const gb=document.getElementById('gBar'),gp=document.getElementById('gPct');
+  if(gb)gb.style.width=gPct+'%';if(gp)gp.textContent=gPct+'%';
+  for(let w=1;w<=4;w++){
+    const wT=Object.keys(TASKS).filter(k=>TASKS[k].w===w);const wD=wT.filter(k=>state[k]).length;
+    const wsub=document.getElementById('wsub-'+w);
+    if(wsub)wsub.textContent=wD+' de '+wT.length+' tareas · '+Math.round(wD/wT.length*100)+'% completado';
+    for(let d=1;d<=7;d++){
+      const dT=Object.keys(TASKS).filter(k=>TASKS[k].w===w&&TASKS[k].d===d);if(!dT.length)continue;
+      const dD=dT.filter(k=>state[k]).length;
+      const badge=document.getElementById('dbadge-'+w+'-'+d);
+      if(badge){badge.textContent=dD+'/'+dT.length;badge.classList.toggle('all-done',dD===dT.length);}
+      const cell=document.getElementById('gc-'+w+'-'+d),pct=document.getElementById('gpct-'+w+'-'+d);
+      if(cell){cell.classList.remove('empty','partial','complete');if(dD===0)cell.classList.add('empty');else if(dD===dT.length)cell.classList.add('complete');else cell.classList.add('partial');}
+      if(pct)pct.textContent=Math.round(dD/dT.length*100)+'%';
+      const gt=document.getElementById('gtime-'+w+'-'+d);
+      if(gt){const tSec=dT.reduce((s,k)=>{const ts=timerState[k];return s+(ts?ts.elapsed+(ts.startedAt?Math.floor((Date.now()-ts.startedAt)/1000):0):0);},0);gt.textContent=tSec>0?'⏱'+fmtSec(tSec):'';}
+    }
+  }
+  Object.keys(SK_DEF).forEach(s=>{
+    const pts=skP[s]||0,max=SK_MAX[s]||1,pct=Math.round(pts/max*100);
+    const spts=document.getElementById('spts-'+s),sbar=document.getElementById('sbar-'+s),spct=document.getElementById('spct-'+s);
+    if(spts)spts.textContent=pts+'/'+max+'pts';if(sbar)sbar.style.width=pct+'%';if(spct)spct.textContent=pct+'%';
+  });
+}
+function showNav(id,el){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));document.getElementById('sec-'+id).classList.add('active');el.classList.add('active');}
+function showWeek(n,el){document.querySelectorAll('.wcontent').forEach(w=>w.classList.remove('active'));document.querySelectorAll('.wtab').forEach(t=>t.classList.remove('active'));const wc=document.getElementById('wc-'+n);if(wc)wc.classList.add('active');if(el)el.classList.add('active');}
+function resetAll(){if(!confirm('¿Reiniciar progreso de este mes? (Los tiempos se conservan)'))return;state={};save();Object.keys(TASKS).forEach(k=>applyTask(k));updateAll();}
+function downloadPlan(){
+  const totalMin=Object.keys(TASKS).reduce((s,k)=>s+getEstMin(k),0);
+  const W_COLORS={1:'#1a5fa8',2:'#1e6b2a',3:'#a85500',4:'#6622cc'};
+  let h='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Plan '+MONTH_TITLE+'</title><style>body{font-family:-apple-system,sans-serif;max-width:800px;margin:0 auto;padding:20px;font-size:13px;color:#1a1a1a}h1{font-size:18px;color:#1a5fa8;border-bottom:3px solid #1a5fa8;padding-bottom:8px;margin-bottom:14px}.summary{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.stat{background:#f0f6ff;border-radius:8px;padding:8px 14px;text-align:center}.stat-n{font-size:18px;font-weight:800;color:#1a5fa8}.stat-l{font-size:10px;color:#888}h2{font-size:14px;font-weight:700;margin:16px 0 6px;padding:6px 10px;border-radius:7px;color:#fff}.day-title{font-size:12px;font-weight:700;background:#f7f8fa;padding:5px 10px;border-radius:6px;margin:8px 0 4px;display:flex;justify-content:space-between}.slot-block{margin-bottom:4px;border:1px solid #f0f0f0;border-radius:7px;overflow:hidden}.slot-header{padding:4px 10px;background:#f7f8fa;font-size:10px;font-weight:700;color:#888;text-transform:uppercase}.task-block{padding:7px 10px;border-top:1px solid #f5f5f5}.task-name{font-size:12px;font-weight:600}.task-name.done{text-decoration:line-through;color:#aaa}.task-desc{font-size:11px;color:#666;margin:2px 0 0 20px}.task-meta-line{font-size:10px;color:#aaa;margin:2px 0 0 20px}.deliv{margin-top:6px;padding:5px 10px;background:#fffbf0;border:1px solid #f5d090;border-radius:6px;font-size:11px;color:#7a5800}@media print{.slot-block{break-inside:avoid}}</style></head><body>';
+  h+='<h1>🎯 '+MONTH_TITLE+'</h1><div class="summary"><div class="stat"><div class="stat-n">'+Object.keys(TASKS).length+'</div><div class="stat-l">Tareas</div></div><div class="stat"><div class="stat-n">'+Math.round(totalMin/60)+'h</div><div class="stat-l">Horas est.</div></div><div class="stat"><div class="stat-n">4</div><div class="stat-l">Semanas</div></div><div class="stat"><div class="stat-n">'+Object.keys(TASKS).filter(k=>state[k]).length+'/'+Object.keys(TASKS).length+'</div><div class="stat-l">Completadas</div></div></div>';
+  for(let w=1;w<=4;w++){
+    h+='<h2 style="background:'+W_COLORS[w]+'">Semana '+w+' — '+WEEK_THEMES[w]+'</h2>';
+    for(let d=1;d<=7;d++){
+      const dT=Object.keys(TASKS).filter(k=>TASKS[k].w===w&&TASKS[k].d===d);if(!dT.length)continue;
+      const dMin=dT.reduce((s,k)=>s+getEstMin(k),0);const dD=dT.filter(k=>state[k]).length;
+      const dSec=dT.reduce((s,k)=>{const ts=timerState[k];return s+(ts?ts.elapsed:0);},0);
+      h+='<div class="day-title"><span>'+DN[d]+' — '+DAY_THEMES[w][d]+'</span><span style="font-weight:400;color:#aaa">'+Math.round(dMin/60)+'h · '+dD+'/'+dT.length+(dSec>0?' · ⏱'+fmtSec(dSec):'')+'</span></div>';
+      for(let sl=1;sl<=3;sl++){
+        const slT=dT.filter(k=>parseInt(k.split('-')[2])===sl);if(!slT.length)continue;
+        const slL=['','🌅 Mañana (8:00-12:00 · 4h)','🌆 Tarde (13:00-17:00 · 4h)','📱 Contenido (17:00-17:30 · 30min)'][sl];
+        h+='<div class="slot-block"><div class="slot-header">'+slL+'</div>';
+        slT.forEach(k=>{
+          const t=TASKS[k];const done=!!state[k];const ts=timerState[k]||{elapsed:0};const wt=taskWeight(k);
+          const icon=done?'✅':'○';const cls=done?' done':'';const realT=ts.elapsed>0?' · real: '+fmtSec(ts.elapsed):'';
+          h+='<div class="task-block"><div>'+icon+'<span class="task-name'+cls+'">&nbsp;'+t.ti+'</span></div><div class="task-desc">'+t.de+'</div><div class="task-meta-line">📚 '+t.co+' · ⚖️ '+wt+'% del mes · ⏱ est: '+fmtEst(k)+realT+'</div></div>';
+        });
+        h+='</div>';
+      }
+      if(d===7)h+='<div class="deliv">🏆 <strong>Entregable S'+w+':</strong> '+WEEK_DELIVERABLES[w]+'</div>';
+    }
+  }
+  h+='<p style="margin-top:20px;font-size:10px;color:#ccc">Generado '+new Date().toLocaleDateString("es-MX")+' · '+MONTH_TITLE+'</p></body></html>';
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([h],{type:'text/html'}));a.download='plan_mes'+MONTH_NUM+'.html';document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+
+
+loadTimers();
+renderChecklist();
+renderGantt();
+renderSkills();
+Object.keys(TASKS).forEach(k=>applyTask(k));
+updateAll();
+initTimers();
+
+
+</script>
+<div class="section" id="sec-sq" style="padding:14px 18px 40px"><div style="font-size:12px;color:#aaa;margin-bottom:16px">Recursos gratuitos para complementar el mes. Ábrelos en una nueva pestaña y explora a tu ritmo 🚀</div><div class="sq-cat"><div class="sq-cat-title">✨ LLMs y GenAI</div><div class="sq-grid"><a class="sq-item" href="https://huggingface.co/learn" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Hugging Face LLM Course</div><div class="sq-item-desc">Cursos gratis: NLP, RL, DiffusionModels</div><div class="sq-item-link">huggingface.co ↗</div></div></a><a class="sq-item" href="https://youtube.com/@AndrejKarpathy" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Andrej Karpathy — Zero to Hero</div><div class="sq-item-desc">Construye GPT desde cero, explicado por el creador</div><div class="sq-item-link">youtube.com ↗</div></div></a><a class="sq-item" href="https://cookbook.openai.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">OpenAI Cookbook</div><div class="sq-item-desc">Ejemplos reales de uso de la API de OpenAI</div><div class="sq-item-link">cookbook.openai.com ↗</div></div></a><a class="sq-item" href="https://promptingguide.ai" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Prompt Engineering Guide</div><div class="sq-item-desc">La guía más completa de prompting, gratis</div><div class="sq-item-link">promptingguide.ai ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">🔗 RAG y Agentes</div><div class="sq-grid"><a class="sq-item" href="https://python.langchain.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">LangChain Docs</div><div class="sq-item-desc">Documentación oficial + tutoriales</div><div class="sq-item-link">python.langchain.com ↗</div></div></a><a class="sq-item" href="https://docs.llamaindex.ai" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">LlamaIndex Docs</div><div class="sq-item-desc">Framework de RAG más usado</div><div class="sq-item-link">docs.llamaindex.ai ↗</div></div></a><a class="sq-item" href="https://academy.langchain.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">LangChain Academy</div><div class="sq-item-desc">Cursos gratis de LangChain</div><div class="sq-item-link">academy.langchain.com ↗</div></div></a><a class="sq-item" href="https://docs.crewai.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">CrewAI Docs</div><div class="sq-item-desc">Multi-agentes con código limpio</div><div class="sq-item-link">docs.crewai.com ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">🤖 Modelos Open Source</div><div class="sq-grid"><a class="sq-item" href="https://ollama.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Ollama</div><div class="sq-item-desc">Corre LLMs localmente gratis (Llama, Mistral...)</div><div class="sq-item-link">ollama.com ↗</div></div></a><a class="sq-item" href="https://huggingface.co/models" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">HF Model Hub</div><div class="sq-item-desc">Miles de modelos gratis para descargar</div><div class="sq-item-link">huggingface.co ↗</div></div></a><a class="sq-item" href="https://lmstudio.ai" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">LM Studio</div><div class="sq-item-desc">GUI para correr LLMs locales sin código</div><div class="sq-item-link">lmstudio.ai ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">🔧 Automatización</div><div class="sq-grid"><a class="sq-item" href="https://n8n.io" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">n8n Cloud Free</div><div class="sq-item-desc">Automatización visual, tier gratis</div><div class="sq-item-link">n8n.io ↗</div></div></a><a class="sq-item" href="https://make.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Make.com</div><div class="sq-item-desc">Zapier alternativa con tier gratis generoso</div><div class="sq-item-link">make.com ↗</div></div></a></div></div></div></body>
+</html>

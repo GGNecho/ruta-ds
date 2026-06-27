@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gantt Global — 6 Meses Data Science</title>
+<style>
+
+:root{color-scheme:light}*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f7f8fa;color:#1a1a1a;font-size:13px}
+.hdr{background:#fff;border-bottom:1px solid #e8e8e8;padding:10px 18px;position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hdr-left h1{font-size:14px;font-weight:700}.hdr-left .sub{font-size:11px;color:#888;margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.prog-bar{width:100px;height:7px;background:#eee;border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#1a5fa8,#2d8a40);border-radius:4px;transition:width .4s}
+.prog-pct{font-size:12px;font-weight:700;color:#1a5fa8;min-width:32px}
+.icon-btn{font-size:11px;color:#999;cursor:pointer;padding:4px 8px;border-radius:6px;border:1px solid #eee;background:#fff}
+.icon-btn:hover{color:#555;border-color:#ccc}
+.dl-btn{font-size:11px;font-weight:700;padding:5px 11px;background:#1a5fa8;color:#fff;border:none;border-radius:7px;cursor:pointer}
+.dl-btn:hover{background:#1550a0}
+.nav{display:flex;gap:4px;padding:10px 18px 0;background:#f7f8fa;border-bottom:1px solid #e8e8e8;position:sticky;top:57px;z-index:190;flex-wrap:wrap}
+.nav-tab{padding:6px 12px;border-radius:8px 8px 0 0;font-size:12px;font-weight:600;cursor:pointer;border:1px solid transparent;border-bottom:none;background:#eee;color:#666;transition:all .15s}
+.nav-tab.active{background:#fff;color:#1a1a1a;border-color:#e0e0e0}
+.section{display:none;padding:14px 18px 40px}.section.active{display:block}
+.wtabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
+.wtab{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #e0e0e0;background:#fff;color:#666;transition:all .15s}
+.wtab.active{background:#1a5fa8;color:#fff;border-color:#1a5fa8}
+.wcontent{display:none}.wcontent.active{display:block}
+.wsub{font-size:11px;color:#888;margin-bottom:12px}
+.day-card{background:#fff;border:1px solid #e8e8e8;border-radius:11px;margin-bottom:9px;overflow:hidden}
+.day-hdr{display:flex;align-items:center;padding:9px 13px;border-bottom:1px solid #f0f0f0;gap:10px}
+.day-name{font-weight:700;font-size:12px;min-width:78px}
+.day-theme{font-size:11px;color:#666;flex:1}
+.day-badge{font-size:10px;padding:2px 7px;border-radius:10px;background:#f0f0f0;color:#999;font-weight:600}
+.day-badge.all-done{background:#e0f5e8;color:#1e7a30}
+.task-row{display:flex;align-items:flex-start;padding:8px 13px;gap:9px;border-bottom:1px solid #f5f5f5;cursor:pointer;transition:background .1s}
+.task-row:last-of-type{border-bottom:none}.task-row:hover{background:#fafafa}.task-row.timing{background:#fffbf0!important}
+.task-check{width:17px;height:17px;border-radius:4px;border:2px solid #ccc;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;transition:all .15s}
+.task-check.done{background:#2d8a40;border-color:#2d8a40}
+.task-info{flex:1;min-width:0}
+.task-slot{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#aaa;margin-bottom:2px}
+.task-title{font-size:12px;font-weight:600;line-height:1.4}
+.task-row.done .task-title{color:#bbb;text-decoration:line-through}
+.task-desc{font-size:11px;color:#888;line-height:1.4;margin-top:2px}
+.task-row.done .task-desc{color:#ccc}
+.task-meta{display:flex;align-items:center;gap:5px;margin-top:4px;flex-wrap:wrap}
+.course-tag{font-size:10px;padding:2px 7px;border-radius:5px;font-weight:500}
+.co{background:#e8f0ff;color:#0056d3}.li{background:#e8f2ff;color:#0a66c2}.pr{background:#e8fff0;color:#1e7a30}
+.skill-pip{font-size:9px;padding:1px 5px;border-radius:4px;font-weight:600;opacity:.8}
+.task-timer{display:flex;align-items:center;gap:7px;margin-top:6px;padding-top:6px;border-top:1px dashed #efefef}
+.timer-real{font-size:11px;font-family:monospace;font-weight:700;color:#1a5fa8;min-width:42px}
+.task-row.timing .timer-real{color:#c06020}
+.timer-sep,.timer-est{font-size:11px;color:#aaa;font-family:monospace}
+.timer-btn{width:22px;height:22px;border-radius:5px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:11px;padding:0;flex-shrink:0}
+.timer-btn:hover{border-color:#1a5fa8}
+.task-row.timing .timer-btn{border-color:#c06020;background:#fff8f0}
+.task-weight{font-size:9px;padding:1px 6px;border-radius:10px;background:#f5f5f5;color:#aaa;font-weight:700;margin-left:auto;white-space:nowrap}
+.deliv{margin:0 13px 11px;padding:7px 10px;background:#fffbf0;border:1px solid #f5e090;border-radius:7px;font-size:11px;color:#7a5800;display:flex;align-items:center;gap:6px}
+.task-row.content-slot{background:#fdf8ff}.task-row.content-slot:hover{background:#f8f0ff}
+.gantt-wrap{overflow-x:auto}
+.gantt{min-width:560px}
+.gantt-hdr{display:grid;grid-template-columns:80px repeat(7,1fr);gap:3px;margin-bottom:4px}
+.gantt-hdr-cell{text-align:center;font-size:10px;font-weight:700;color:#888;padding:4px}
+.gantt-row{display:grid;grid-template-columns:80px repeat(7,1fr);gap:3px;margin-bottom:3px}
+.gantt-week-label{font-size:11px;font-weight:700;color:#555;padding:4px 6px}
+.gantt-cell{border-radius:8px;padding:6px 4px;text-align:center;border:1px solid #e8e8e8;background:#fff;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.gantt-cell.empty{background:#f7f8fa}.gantt-cell.partial{background:#fff8e8;border-color:#f5d890}.gantt-cell.complete{background:#e8f8ec;border-color:#8dd4a0}
+.gantt-dots{display:flex;gap:3px;justify-content:center}
+.gantt-dot{width:7px;height:7px;border-radius:50%;background:#ddd}.gantt-dot.done{background:#2d8a40}.gantt-dot.content{background:#7c3aed}
+.gantt-pct{font-size:9px;color:#aaa;font-weight:600}.gantt-cell.complete .gantt-pct{color:#2d8a40}
+.gantt-time{font-size:9px;color:#c06020;font-family:monospace;font-weight:600}
+.gantt-legend{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#666}
+.legend-box{width:14px;height:14px;border-radius:4px}
+.skills-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:500px){.skills-grid{grid-template-columns:1fr}}
+.skill-card{background:#fff;border:1px solid #e8e8e8;border-radius:11px;padding:13px}
+.skill-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.skill-name{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+.skill-pts{font-size:11px;font-weight:700}
+.skill-bar-outer{height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden;margin-bottom:4px}
+.skill-bar-inner{height:100%;border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.skill-pct{font-size:10px;color:#aaa}
+.w1 .day-name{color:#1a5fa8}.w2 .day-name{color:#1e6b2a}.w3 .day-name{color:#a85500}.w4 .day-name{color:#6622cc}
+
+.gantt-hdr{display:grid;grid-template-columns:90px repeat(7,1fr);gap:3px;margin-bottom:4px}
+.gantt-hdr-cell{text-align:center;font-size:10px;font-weight:700;color:#888;padding:4px}
+.gantt-row{display:grid;grid-template-columns:90px repeat(7,1fr);gap:3px;margin-bottom:3px}
+.month-section{margin-bottom:22px}
+.month-hdr{font-size:13px;font-weight:800;padding:8px 12px;border-radius:9px;color:#fff;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.month-prog{font-size:11px;background:rgba(255,255,255,.25);padding:3px 9px;border-radius:10px}
+.gantt-week-label{font-size:10px;font-weight:700;color:#555;padding:4px 6px;display:flex;flex-direction:column;justify-content:center}
+.gantt-cell{border-radius:8px;padding:5px 3px;text-align:center;border:1px solid #e8e8e8;background:#fff;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.gantt-cell.empty{background:#f7f8fa}.gantt-cell.partial{background:#fff8e8;border-color:#f5d890}.gantt-cell.complete{background:#e8f8ec;border-color:#8dd4a0}
+.gantt-dots{display:flex;gap:2px;justify-content:center;flex-wrap:wrap;max-width:60px}
+.gantt-dot{width:6px;height:6px;border-radius:50%;background:#ddd}.gantt-dot.done{background:#2d8a40}.gantt-dot.content{background:#7c3aed}
+.gantt-pct{font-size:9px;color:#aaa;font-weight:600}.gantt-cell.complete .gantt-pct{color:#2d8a40}
+.global-prog{background:#fff;border:1px solid #e8e8e8;border-radius:11px;padding:14px 18px;margin-bottom:18px}
+.global-prog-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.global-prog-label{font-size:13px;font-weight:700}
+.global-prog-pct{font-size:18px;font-weight:800;color:#1a5fa8}
+.prog-bar-big{height:12px;background:#eee;border-radius:6px;overflow:hidden}
+.prog-fill-big{height:100%;background:linear-gradient(90deg,#1a5fa8,#2d8a40);border-radius:6px;transition:width .4s}
+.month-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+@media(max-width:600px){.month-cards{grid-template-columns:1fr 1fr}}
+.month-card{background:#fff;border:1px solid #e8e8e8;border-radius:11px;padding:12px;text-decoration:none;color:#1a1a1a}
+.month-card:hover{border-color:#1a5fa8}
+.month-card-num{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.month-card-title{font-size:11px;font-weight:700;line-height:1.3;margin-bottom:8px}
+.month-card-bar{height:5px;background:#f0f0f0;border-radius:3px;overflow:hidden}
+.month-card-fill{height:100%;border-radius:3px;transition:width .4s}
+.month-card-pct{font-size:10px;color:#aaa;margin-top:4px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr-left">
+    <h1>📅 Gantt Global — Ruta Data Science</h1>
+    <div class="sub">6 meses · 360 tareas · ~1800 horas de aprendizaje</div>
+  </div>
+  <div class="hdr-right">
+    <div class="prog-bar"><div class="prog-fill" id="gBar" style="width:0%"></div></div>
+    <div class="prog-pct" id="gPct">0%</div>
+    <a href="skills.html" style="font-size:11px;padding:5px 10px;background:#7c3aed;color:#fff;border-radius:7px;text-decoration:none">⚡ Skills</a>
+    <a href="index.html" class="icon-btn">🏠</a>
+  </div>
+</div>
+
+<div style="padding:14px 18px 40px">
+  <div class="global-prog">
+    <div class="global-prog-top">
+      <div class="global-prog-label">Progreso Global del Programa</div>
+      <div class="global-prog-pct" id="gGlobalPct">0%</div>
+    </div>
+    <div class="prog-bar-big"><div class="prog-fill-big" id="gGlobalBar" style="width:0%"></div></div>
+    <div style="font-size:11px;color:#aaa;margin-top:6px" id="gGlobalSub">0 de 360 tareas completadas</div>
+  </div>
+
+  <div class="month-cards" id="monthCards"></div>
+
+  <div style="overflow-x:auto">
+    <div style="min-width:560px">
+      <div class="gantt-hdr">
+        <div class="gantt-hdr-cell"></div>
+        <div class="gantt-hdr-cell">Lun</div><div class="gantt-hdr-cell">Mar</div>
+        <div class="gantt-hdr-cell">Mié</div><div class="gantt-hdr-cell">Jue</div>
+        <div class="gantt-hdr-cell">Vie</div><div class="gantt-hdr-cell">Sáb</div>
+        <div class="gantt-hdr-cell">Dom</div>
+      </div>
+      <div id="gantt-body"></div>
+    </div>
+  </div>
+
+  <div class="gantt-legend" style="margin-top:14px">
+    <div class="legend-item"><div class="legend-box" style="background:#f7f8fa;border:1px solid #e8e8e8"></div>Sin iniciar</div>
+    <div class="legend-item"><div class="legend-box" style="background:#fff8e8;border:1px solid #f5d890"></div>En progreso</div>
+    <div class="legend-item"><div class="legend-box" style="background:#e8f8ec;border:1px solid #8dd4a0"></div>Completo</div>
+  </div>
+</div>
+
+<script>
+const M_COLORS = {"1":"#1a5fa8","2":"#8b008b","3":"#e74c3c","4":"#8e44ad","5":"#2c3e50","6":"#e67e22"};
+const M_TITLES = {"1":"Python + Pandas + SQL + Estadística + ML Intro","2":"ML Avanzado + Time Series + Power BI + A/B Testing","3":"Deep Learning + NLP + Computer Vision + Apps","4":"LLMs + RAG + Agentes + Prompt Engineering","5":"MLOps + Docker + Cloud (AWS/GCP) + CI/CD","6":"Data Engineering + Portfolio Final + Job Search"};
+const SK_DEF = {"py": {"label": "Python", "icon": "🐍", "color": "#1a5fa8"}, "pd": {"label": "Pandas / NumPy", "icon": "🐼", "color": "#2d8a40"}, "sq": {"label": "SQL", "icon": "🗃️", "color": "#c06a00"}, "st": {"label": "Estadística", "icon": "📊", "color": "#7c3aed"}, "vz": {"label": "Visualización", "icon": "📈", "color": "#c0392b"}, "gt": {"label": "Git & GitHub", "icon": "⚙️", "color": "#156070"}, "ml": {"label": "Machine Learning", "icon": "🤖", "color": "#8b008b"}, "bi": {"label": "Power BI / Tableau", "icon": "📉", "color": "#d4850a"}, "dl": {"label": "Deep Learning", "icon": "🧠", "color": "#e74c3c"}, "nlp": {"label": "NLP / Texto", "icon": "💬", "color": "#16a085"}, "llm": {"label": "LLMs & GenAI", "icon": "✨", "color": "#8e44ad"}, "ops": {"label": "MLOps / Docker", "icon": "🔧", "color": "#2c3e50"}, "cl": {"label": "Cloud (AWS/GCP)", "icon": "☁️", "color": "#2980b9"}, "de": {"label": "Data Engineering", "icon": "⚡", "color": "#e67e22"}, "ct": {"label": "Portfolio / Contenido", "icon": "📝", "color": "#c05070"}, "cd": {"label": "Código / Proyectos", "icon": "💻", "color": "#444"}};
+const DN = {1:'Lun',2:'Mar',3:'Mié',4:'Jue',5:'Vie',6:'Sáb',7:'Dom'};
+
+// Load all tasks + states from localStorage
+const ALL_TASKS = {};
+const ALL_STATE = {};
+for(let m=1;m<=6;m++){
+  try{const s=localStorage.getItem('ds_mes'+m+'_tasks');if(s)ALL_STATE[m]=JSON.parse(s);else ALL_STATE[m]={};}catch(e){ALL_STATE[m]={};}
+}
+
+// Build month cards
+const mc=document.getElementById('monthCards');
+for(let m=1;m<=6;m++){
+  const card=document.createElement('a');card.className='month-card';card.href='mes'+m+'.html';
+  // We can only show progress if we have state; task counts are encoded in HTML
+  const state=ALL_STATE[m]||{};const doneKeys=Object.keys(state).filter(k=>state[k]);
+  card.innerHTML='<div class="month-card-num" style="color:'+M_COLORS[m]+'">Mes '+m+'</div><div class="month-card-title">'+M_TITLES[m]+'</div><div class="month-card-bar"><div class="month-card-fill" style="background:'+M_COLORS[m]+';width:'+Math.min(100,Math.round(doneKeys.length/60*100))+'%"></div></div><div class="month-card-pct">'+doneKeys.length+'/60 tareas</div>';
+  mc.appendChild(card);
+}
+
+// Build gantt rows
+const body=document.getElementById('gantt-body');
+for(let m=1;m<=6;m++){
+  const mhdr=document.createElement('div');
+  mhdr.style.cssText='margin:10px 0 5px;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:700;color:#fff;background:'+M_COLORS[m];
+  const mState=ALL_STATE[m]||{};const mDone=Object.keys(mState).filter(k=>mState[k]).length;
+  mhdr.innerHTML='Mes '+m+' — '+M_TITLES[m]+'<span style="float:right;font-size:11px;background:rgba(255,255,255,.25);padding:2px 8px;border-radius:8px">'+mDone+'/60</span>';
+  body.appendChild(mhdr);
+  for(let w=1;w<=4;w++){
+    const row=document.createElement('div');row.className='gantt-row';
+    const wl=document.createElement('div');wl.className='gantt-week-label';
+    wl.innerHTML='<strong>S'+w+'</strong>';row.appendChild(wl);
+    for(let d=1;d<=7;d++){
+      const cell=document.createElement('div');cell.className='gantt-cell';
+      // Tasks for this month/week/day: keys like "w-d-s"
+      const taskKeys=[];
+      for(let s=1;s<=3;s++){
+        const k=w+'-'+d+'-'+s;
+        // We check a fixed count: each day has up to 3 slots, but not all exist
+        // Actually with our data structure we need to know which exist
+        // Simpler: check state for any key matching this pattern
+        if(mState[k]!==undefined)taskKeys.push(k);
+      }
+      // Estimate from typical pattern: days 1-6 have 2 tasks, day 7 has 3
+      const typicalCount=d===7?3:2;
+      const stateKeys=Object.keys(mState).filter(k=>{
+        const p=k.split('-');return p.length===3&&parseInt(p[0])===w&&parseInt(p[1])===d;
+      });
+      const dDone=stateKeys.filter(k=>mState[k]).length;
+      const dTotal=stateKeys.length||typicalCount;
+      const pct=dTotal>0?Math.round(dDone/dTotal*100):0;
+      cell.classList.add(pct===0?'empty':pct===100?'complete':'partial');
+      const dots=stateKeys.map(k=>'<div class="gantt-dot'+(mState[k]?' done':'')+'">'+'</div>').join('');
+      cell.innerHTML='<div style="font-size:9px;font-weight:700;color:inherit">'+DN[d]+'</div><div class="gantt-dots">'+(dots||'<div class="gantt-dot"></div><div class="gantt-dot"></div>')+'</div><div class="gantt-pct">'+pct+'%</div>';
+      row.appendChild(cell);
+    }
+    body.appendChild(row);
+  }
+}
+
+// Global progress
+let gTotal=0,gDone=0;
+for(let m=1;m<=6;m++){
+  const st=ALL_STATE[m]||{};
+  const keys=Object.keys(st);
+  // Count existing tasks (not all 60 keys may be set until user visits the page)
+  // Use 60 per month as the known total
+  gTotal+=60;
+  gDone+=keys.filter(k=>st[k]).length;
+}
+const gPct=Math.round(gDone/gTotal*100);
+document.getElementById('gGlobalPct').textContent=gPct+'%';
+document.getElementById('gGlobalBar').style.width=gPct+'%';
+document.getElementById('gGlobalSub').textContent=gDone+' de '+gTotal+' tareas completadas';
+document.getElementById('gBar').style.width=gPct+'%';
+document.getElementById('gPct').textContent=gPct+'%';
+</script>
+</body>
+</html>

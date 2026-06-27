@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes 2 — ML Avanzado + Time Series + Power BI + A/B Testing</title>
+<style>
+:root{color-scheme:light}*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f7f8fa;color:#1a1a1a;font-size:13px}
+.hdr{background:#fff;border-bottom:1px solid #e8e8e8;padding:10px 18px;position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hdr-left h1{font-size:14px;font-weight:700}.hdr-left .sub{font-size:11px;color:#888;margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.prog-bar{width:100px;height:7px;background:#eee;border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#1a5fa8,#2d8a40);border-radius:4px;transition:width .4s}
+.prog-pct{font-size:12px;font-weight:700;color:#1a5fa8;min-width:32px}
+.icon-btn{font-size:11px;color:#999;cursor:pointer;padding:4px 8px;border-radius:6px;border:1px solid #eee;background:#fff}
+.icon-btn:hover{color:#555;border-color:#ccc}
+.dl-btn{font-size:11px;font-weight:700;padding:5px 11px;background:#1a5fa8;color:#fff;border:none;border-radius:7px;cursor:pointer}
+.dl-btn:hover{background:#1550a0}
+.nav{display:flex;gap:4px;padding:10px 18px 0;background:#f7f8fa;border-bottom:1px solid #e8e8e8;position:sticky;top:57px;z-index:190;flex-wrap:wrap}
+.nav-tab{padding:6px 12px;border-radius:8px 8px 0 0;font-size:12px;font-weight:600;cursor:pointer;border:1px solid transparent;border-bottom:none;background:#eee;color:#666;transition:all .15s}
+.nav-tab.active{background:#fff;color:#1a1a1a;border-color:#e0e0e0}
+.section{display:none;padding:14px 18px 40px}.section.active{display:block}
+.wtabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
+.wtab{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #e0e0e0;background:#fff;color:#666;transition:all .15s}
+.wtab.active{background:#1a5fa8;color:#fff;border-color:#1a5fa8}
+.wcontent{display:none}.wcontent.active{display:block}
+.wsub{font-size:11px;color:#888;margin-bottom:12px}
+.day-card{background:#fff;border:1px solid #e8e8e8;border-radius:11px;margin-bottom:9px;overflow:hidden}
+.day-hdr{display:flex;align-items:center;padding:9px 13px;border-bottom:1px solid #f0f0f0;gap:10px}
+.day-name{font-weight:700;font-size:12px;min-width:78px}
+.day-theme{font-size:11px;color:#666;flex:1}
+.day-badge{font-size:10px;padding:2px 7px;border-radius:10px;background:#f0f0f0;color:#999;font-weight:600}
+.day-badge.all-done{background:#e0f5e8;color:#1e7a30}
+.task-row{display:flex;align-items:flex-start;padding:8px 13px;gap:9px;border-bottom:1px solid #f5f5f5;cursor:pointer;transition:background .1s}
+.task-row:last-of-type{border-bottom:none}.task-row:hover{background:#fafafa}.task-row.timing{background:#fffbf0!important}
+.task-check{width:17px;height:17px;border-radius:4px;border:2px solid #ccc;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;transition:all .15s}
+.task-check.done{background:#2d8a40;border-color:#2d8a40}
+.task-info{flex:1;min-width:0}
+.task-slot{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#aaa;margin-bottom:2px}
+.task-title{font-size:12px;font-weight:600;line-height:1.4}
+.task-row.done .task-title{color:#bbb;text-decoration:line-through}
+.task-desc{font-size:11px;color:#888;line-height:1.4;margin-top:2px}
+.task-row.done .task-desc{color:#ccc}
+.task-meta{display:flex;align-items:center;gap:5px;margin-top:4px;flex-wrap:wrap}
+.course-tag{font-size:10px;padding:2px 7px;border-radius:5px;font-weight:500}
+.co{background:#e8f0ff;color:#0056d3}.li{background:#e8f2ff;color:#0a66c2}.pr{background:#e8fff0;color:#1e7a30}
+.skill-pip{font-size:9px;padding:1px 5px;border-radius:4px;font-weight:600;opacity:.8}
+.task-timer{display:flex;align-items:center;gap:7px;margin-top:6px;padding-top:6px;border-top:1px dashed #efefef}
+.timer-real{font-size:11px;font-family:monospace;font-weight:700;color:#1a5fa8;min-width:42px}
+.task-row.timing .timer-real{color:#c06020}
+.timer-sep,.timer-est{font-size:11px;color:#aaa;font-family:monospace}
+.timer-btn{width:22px;height:22px;border-radius:5px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:11px;padding:0;flex-shrink:0}
+.timer-btn:hover{border-color:#1a5fa8}
+.task-row.timing .timer-btn{border-color:#c06020;background:#fff8f0}
+.task-weight{font-size:9px;padding:1px 6px;border-radius:10px;background:#f5f5f5;color:#aaa;font-weight:700;margin-left:auto;white-space:nowrap}
+.deliv{margin:0 13px 11px;padding:7px 10px;background:#fffbf0;border:1px solid #f5e090;border-radius:7px;font-size:11px;color:#7a5800;display:flex;align-items:center;gap:6px}
+.task-row.content-slot{background:#fdf8ff}.task-row.content-slot:hover{background:#f8f0ff}
+.gantt-wrap{overflow-x:auto}
+.gantt{min-width:560px}
+.gantt-hdr{display:grid;grid-template-columns:80px repeat(7,1fr);gap:3px;margin-bottom:4px}
+.gantt-hdr-cell{text-align:center;font-size:10px;font-weight:700;color:#888;padding:4px}
+.gantt-row{display:grid;grid-template-columns:80px repeat(7,1fr);gap:3px;margin-bottom:3px}
+.gantt-week-label{font-size:11px;font-weight:700;color:#555;padding:4px 6px}
+.gantt-cell{border-radius:8px;padding:6px 4px;text-align:center;border:1px solid #e8e8e8;background:#fff;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.gantt-cell.empty{background:#f7f8fa}.gantt-cell.partial{background:#fff8e8;border-color:#f5d890}.gantt-cell.complete{background:#e8f8ec;border-color:#8dd4a0}
+.gantt-dots{display:flex;gap:3px;justify-content:center}
+.gantt-dot{width:7px;height:7px;border-radius:50%;background:#ddd}.gantt-dot.done{background:#2d8a40}.gantt-dot.content{background:#7c3aed}
+.gantt-pct{font-size:9px;color:#aaa;font-weight:600}.gantt-cell.complete .gantt-pct{color:#2d8a40}
+.gantt-time{font-size:9px;color:#c06020;font-family:monospace;font-weight:600}
+.gantt-legend{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#666}
+.legend-box{width:14px;height:14px;border-radius:4px}
+.skills-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:500px){.skills-grid{grid-template-columns:1fr}}
+.skill-card{background:#fff;border:1px solid #e8e8e8;border-radius:11px;padding:13px}
+.skill-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.skill-name{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+.skill-pts{font-size:11px;font-weight:700}
+.skill-bar-outer{height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden;margin-bottom:4px}
+.skill-bar-inner{height:100%;border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.skill-pct{font-size:10px;color:#aaa}
+.w1 .day-name{color:#1a5fa8}.w2 .day-name{color:#1e6b2a}.w3 .day-name{color:#a85500}.w4 .day-name{color:#6622cc}
+
+.sq-cat{margin-bottom:18px}
+.sq-cat-title{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.sq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+.sq-item{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:12px 14px;text-decoration:none;display:flex;align-items:flex-start;gap:10px;transition:border-color .15s,transform .1s}
+.sq-item:hover{border-color:#1a5fa8;transform:translateY(-1px)}
+.sq-item-icon{font-size:20px;flex-shrink:0;margin-top:1px}
+.sq-item-name{font-size:12px;font-weight:700;color:#1a1a1a;margin-bottom:2px}
+.sq-item-desc{font-size:11px;color:#888;line-height:1.4}
+.sq-item-link{font-size:10px;color:#1a5fa8;margin-top:3px}
+
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-left">
+    <h1 style="color:#8b008b">📅 Mes 2 — ML Avanzado + Time Series + Power BI + A/B Testing</h1>
+    <div class="sub">XGBoost · LightGBM · SHAP · Optuna · Prophet · Power BI · Tableau · A/B Testing</div>
+  </div>
+  <div class="hdr-right">
+    <button class="dl-btn" onclick="downloadPlan()">📥 Plan</button>
+    <div class="prog-bar"><div class="prog-fill" id="gBar" style="width:0%"></div></div>
+    <div class="prog-pct" id="gPct">0%</div>
+    <button class="icon-btn" onclick="resetAll()">↺</button><button id="fbBtn" onclick="" style="font-size:11px;padding:5px 10px;border-radius:7px;border:1px solid #ddd;cursor:pointer;background:#fff;color:#555">☁️ Sync</button>
+  </div>
+</div>
+
+<div style="background:#fff;border-bottom:1px solid #e8e8e8;padding:8px 18px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+  <span style="font-size:11px;color:#aaa">Ir a:</span>
+  <a href="mes1.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">Mes 1</a> <a href="mes2.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#1a5fa8;color:#fff">Mes 2</a> <a href="mes3.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">Mes 3</a> <a href="mes4.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">Mes 4</a> <a href="mes5.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">Mes 5</a> <a href="mes6.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">Mes 6</a>
+  <a href="gantt.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">📅 Gantt Global</a>
+  <a href="skills.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">⚡ Skills</a>
+  <a href="index.html" style="font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;background:#eee;color:#666">🏠 Inicio</a>
+</div>
+
+<div class="nav">
+  <div class="nav-tab active" onclick="showNav('checklist',this)">📋 Checklist</div>
+  <div class="nav-tab" onclick="showNav('gantt',this)">📅 Gantt</div>
+  <div class="nav-tab" onclick="showNav('skills',this)">⚡ Skills</div>
+  <div class="nav-tab" onclick="showNav('sq',this)">🎯 Side Quests</div>
+</div>
+
+<div class="section active" id="sec-checklist">
+  <div class="wtabs">
+    <div class="wtab active" onclick="showWeek(1,this)">Semana 1</div>
+    <div class="wtab" onclick="showWeek(2,this)">Semana 2</div>
+    <div class="wtab" onclick="showWeek(3,this)">Semana 3</div>
+    <div class="wtab" onclick="showWeek(4,this)">Semana 4</div>
+  </div>
+  <div id="checklist-body"></div>
+</div>
+
+<div class="section" id="sec-gantt">
+  <div class="gantt-wrap">
+    <div class="gantt">
+      <div class="gantt-hdr"><div class="gantt-hdr-cell"></div><div class="gantt-hdr-cell">Lun</div><div class="gantt-hdr-cell">Mar</div><div class="gantt-hdr-cell">Mié</div><div class="gantt-hdr-cell">Jue</div><div class="gantt-hdr-cell">Vie</div><div class="gantt-hdr-cell">Sáb</div><div class="gantt-hdr-cell">Dom</div></div>
+      <div id="gantt-body"></div>
+    </div>
+    <div class="gantt-legend">
+      <div class="legend-item"><div class="legend-box" style="background:#f7f8fa;border:1px solid #e8e8e8"></div>Sin iniciar</div>
+      <div class="legend-item"><div class="legend-box" style="background:#fff8e8;border:1px solid #f5d890"></div>En progreso</div>
+      <div class="legend-item"><div class="legend-box" style="background:#e8f8ec;border:1px solid #8dd4a0"></div>Completo</div>
+      <div class="legend-item"><div class="gantt-dot done" style="margin:0"></div>Tarea</div>
+      <div class="legend-item"><div class="gantt-dot content" style="margin:0"></div>Contenido</div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="sec-skills">
+  <div class="skills-grid" id="skills-body"></div>
+</div>
+
+<script>
+const MONTH_NUM = 2;
+const MONTH_TITLE = 'Mes 2 — ML Avanzado + Time Series + Power BI + A/B Testing';
+const STORE = 'ds_mes2_tasks';
+const TIMER_STORE = 'ds_mes2_timers';
+const SK_DEF = {"py": {"label": "Python", "icon": "🐍", "color": "#1a5fa8"}, "pd": {"label": "Pandas / NumPy", "icon": "🐼", "color": "#2d8a40"}, "sq": {"label": "SQL", "icon": "🗃️", "color": "#c06a00"}, "st": {"label": "Estadística", "icon": "📊", "color": "#7c3aed"}, "vz": {"label": "Visualización", "icon": "📈", "color": "#c0392b"}, "gt": {"label": "Git & GitHub", "icon": "⚙️", "color": "#156070"}, "ml": {"label": "Machine Learning", "icon": "🤖", "color": "#8b008b"}, "bi": {"label": "Power BI / Tableau", "icon": "📉", "color": "#d4850a"}, "dl": {"label": "Deep Learning", "icon": "🧠", "color": "#e74c3c"}, "nlp": {"label": "NLP / Texto", "icon": "💬", "color": "#16a085"}, "llm": {"label": "LLMs & GenAI", "icon": "✨", "color": "#8e44ad"}, "ops": {"label": "MLOps / Docker", "icon": "🔧", "color": "#2c3e50"}, "cl": {"label": "Cloud (AWS/GCP)", "icon": "☁️", "color": "#2980b9"}, "de": {"label": "Data Engineering", "icon": "⚡", "color": "#e67e22"}, "ct": {"label": "Portfolio / Contenido", "icon": "📝", "color": "#c05070"}, "cd": {"label": "Código / Proyectos", "icon": "💻", "color": "#444"}};
+const TASKS = {"1-1-1": {"w": 1, "d": 1, "sl": "🌅 Mañana · 4 hrs", "ti": "XGBoost: teoría y primer modelo", "de": "n_estimators, max_depth, learning_rate, subsample. Dataset de crédito vs Random Forest.", "co": "LinkedIn — XGBoost & LightGBM Essential Training", "ct": "li", "sk": {"ml": 20, "cd": 10}}, "1-1-2": {"w": 1, "d": 1, "sl": "🌆 Tarde · 4 hrs", "ti": "LightGBM: velocidad y parámetros clave", "de": "LightGBM vs XGBoost: cuándo usar cuál. leaf-wise growth, categorical features.", "co": "Documentación oficial LightGBM", "ct": "pr", "sk": {"ml": 15, "cd": 10}}, "1-2-1": {"w": 1, "d": 2, "sl": "🌅 Mañana · 4 hrs", "ti": "SHAP: explicabilidad de modelos", "de": "shap.Explainer, beeswarm, waterfall, force plot. ¿Qué variables mueven el crédito?", "co": "pip install shap · Documentación SHAP", "ct": "pr", "sk": {"ml": 20, "cd": 5}}, "1-2-2": {"w": 1, "d": 2, "sl": "🌆 Tarde · 4 hrs", "ti": "Optuna: hyperparameter tuning automático", "de": "optuna.create_study(), suggest_float/int/categorical. Tuneo XGBoost en 50 trials.", "co": "pip install optuna", "ct": "pr", "sk": {"ml": 20, "cd": 10}}, "1-3-1": {"w": 1, "d": 3, "sl": "🌅 Mañana · 4 hrs", "ti": "Imbalanced datasets: SMOTE y estrategias", "de": "SMOTE, ADASYN, class_weight, threshold tuning. Default rate 5% → estrategia correcta.", "co": "pip install imbalanced-learn", "ct": "li", "sk": {"ml": 15, "cd": 5}}, "1-3-2": {"w": 1, "d": 3, "sl": "🌆 Tarde · 4 hrs", "ti": "Pipelines de sklearn sin data leakage", "de": "Pipeline(steps), ColumnTransformer, make_pipeline. End-to-end limpio.", "co": "LinkedIn — Scikit-learn Essential Training", "ct": "li", "sk": {"ml": 15, "cd": 10}}, "1-4-1": {"w": 1, "d": 4, "sl": "🌅 Mañana · 4 hrs", "ti": "CatBoost: categorical features sin encoding", "de": "CatBoostClassifier, cat_features. Compara con LightGBM en dataset mixto.", "co": "Documentación CatBoost", "ct": "pr", "sk": {"ml": 15, "cd": 10}}, "1-4-2": {"w": 1, "d": 4, "sl": "🌆 Tarde · 4 hrs", "ti": "Stacking y Ensemble methods", "de": "StackingClassifier, VotingClassifier, BaggingClassifier. Combina XGB+LGB+LR.", "co": "Coursera — Advanced ML · Ensemble Methods", "ct": "co", "sk": {"ml": 20, "cd": 10}}, "1-5-1": {"w": 1, "d": 5, "sl": "🌅 Mañana · 4 hrs", "ti": "Cross-validation estratificada y StratifiedKFold", "de": "StratifiedKFold, RepeatedStratifiedKFold. ¿Por qué K-Fold estándar miente con imbalance?", "co": "LinkedIn — ML Foundations · Cap CV", "ct": "li", "sk": {"ml": 15, "st": 5}}, "1-5-2": {"w": 1, "d": 5, "sl": "🌆 Tarde · 4 hrs", "ti": "Learning curves: diagnóstico de underfitting/overfitting", "de": "learning_curve(), validation_curve(). Diagnóstica tu modelo antes de tunearlo.", "co": "Práctica propia", "ct": "pr", "sk": {"ml": 15, "cd": 10}}, "1-6-1": {"w": 1, "d": 6, "sl": "🌅 Mañana · 4 hrs", "ti": "Feature importance: permutation vs SHAP vs Gini", "de": "Compara 3 métodos en el mismo modelo. ¿Coinciden? ¿Cuándo divergen?", "co": "Práctica comparativa", "ct": "pr", "sk": {"ml": 15, "cd": 10}}, "1-6-2": {"w": 1, "d": 6, "sl": "🌆 Tarde · 4 hrs", "ti": "Pipeline completo tabular dataset", "de": "Template reutilizable: ingest → clean → features → model → eval → SHAP → export.", "co": "Proyecto propio · Template GitHub", "ct": "pr", "sk": {"ml": 10, "cd": 20}}, "1-7-1": {"w": 1, "d": 7, "sl": "🌅 Mañana · 4 hrs", "ti": "Refinar pipeline + documentar en notebook", "de": "Notebook profesional del pipeline de clasificación de crédito.", "co": "Proyecto propio", "ct": "pr", "sk": {"cd": 15, "ct": 10}}, "1-7-2": {"w": 1, "d": 7, "sl": "🌆 Tarde · 4 hrs", "ti": "Preview Time Series: instalar Prophet", "de": "pip install prophet statsmodels pmdarima. Lee: ¿qué es estacionalidad?", "co": "Preview Mes 2 S2", "ct": "co", "sk": {"ml": 5}}, "1-7-3": {"w": 1, "d": 7, "sl": "📱 Contenido · 30 min", "ti": "Post: \"SHAP me mostró qué variables importan\"", "de": "Screenshot de beeswarm plot. Explica 1 insight financiero que encontraste.", "co": "LinkedIn + GitHub", "ct": "pr", "sk": {"ct": 20}}, "2-1-1": {"w": 2, "d": 1, "sl": "🌅 Mañana · 4 hrs", "ti": "Time Series fundamentals: descomposición", "de": "Tendencia, estacionalidad, ruido. seasonal_decompose() en ventas reales.", "co": "Coursera — Time Series Analysis · Sem 1", "ct": "co", "sk": {"ml": 10, "st": 10}}, "2-1-2": {"w": 2, "d": 1, "sl": "🌆 Tarde · 4 hrs", "ti": "ARIMA y SARIMA con statsmodels", "de": "ACF, PACF, selección de p/d/q. SARIMA en datos mensuales con estacionalidad.", "co": "LinkedIn — Time Series Forecasting", "ct": "li", "sk": {"ml": 15, "st": 10}}, "2-2-1": {"w": 2, "d": 2, "sl": "🌅 Mañana · 4 hrs", "ti": "Prophet de Meta: forecasting rápido", "de": "Prophet() con trend, seasonality, holidays. Forecasting de ingresos a 90 días.", "co": "pip install prophet · Meta docs", "ct": "pr", "sk": {"ml": 15, "cd": 10}}, "2-2-2": {"w": 2, "d": 2, "sl": "🌆 Tarde · 4 hrs", "ti": "pmdarima: auto_arima", "de": "auto_arima(stepwise=True). Encuentra p/d/q automáticamente. Compara con Prophet.", "co": "pip install pmdarima", "ct": "pr", "sk": {"ml": 15, "cd": 5}}, "2-3-1": {"w": 2, "d": 3, "sl": "🌅 Mañana · 4 hrs", "ti": "Feature engineering para series temporales", "de": "Lags (t-1, t-7, t-30), rolling mean/std, diferencias, fourier features.", "co": "Práctica con yfinance + dataset de ventas", "ct": "pr", "sk": {"ml": 15, "cd": 10}}, "2-3-2": {"w": 2, "d": 3, "sl": "🌆 Tarde · 4 hrs", "ti": "Evaluación de TS: MAPE, RMSE, MAE, SMAPE", "de": "Cuál usar y cuándo. Walk-forward validation. Backtesting correcto.", "co": "Práctica comparativa", "ct": "pr", "sk": {"ml": 10, "st": 10}}, "2-4-1": {"w": 2, "d": 4, "sl": "🌅 Mañana · 4 hrs", "ti": "XGBoost en Time Series con features de ventana", "de": "Convierte TS en problema supervisado. XGBoost con lags como features.", "co": "Práctica propia", "ct": "pr", "sk": {"ml": 20, "cd": 10}}, "2-4-2": {"w": 2, "d": 4, "sl": "🌆 Tarde · 4 hrs", "ti": "TimeSeriesSplit: backtesting correcto", "de": "TimeSeriesSplit(n_splits=5). Nunca uses KFold en series temporales.", "co": "Práctica propia", "ct": "pr", "sk": {"ml": 10, "st": 10}}, "2-5-1": {"w": 2, "d": 5, "sl": "🌅 Mañana · 4 hrs", "ti": "Proyecto: Forecasting de ventas retail", "de": "Dataset M5 Forecasting (Walmart) de Kaggle. EDA + Prophet + XGBoost.", "co": "Dataset M5 Forecasting — Kaggle", "ct": "pr", "sk": {"ml": 15, "cd": 15}}, "2-5-2": {"w": 2, "d": 5, "sl": "🌆 Tarde · 4 hrs", "ti": "Anomaly detection en series temporales", "de": "Isolation Forest, z-score rolling, Prophet intervals. Detecta anomalías en transacciones.", "co": "Práctica aplicada", "ct": "pr", "sk": {"ml": 15, "cd": 10}}, "2-6-1": {"w": 2, "d": 6, "sl": "🌅 Mañana · 4 hrs", "ti": "Multivariado: VAR y causalidad de Granger", "de": "Vector Autoregression, grangers_causation_matrix. Variables macroeconómicas.", "co": "statsmodels · VAR docs", "ct": "pr", "sk": {"ml": 10, "st": 15}}, "2-6-2": {"w": 2, "d": 6, "sl": "🌆 Tarde · 4 hrs", "ti": "Deploy forecasting como función Python", "de": "Función reutilizable: recibe CSV → entrena → predice → exporta resultados.", "co": "Proyecto propio · Módulo Python", "ct": "pr", "sk": {"ml": 10, "cd": 20}}, "2-7-1": {"w": 2, "d": 7, "sl": "🌅 Mañana · 4 hrs", "ti": "Push proyecto TS a GitHub + README", "de": "README con metodología, MAPE obtenido, cómo ejecutar. En inglés.", "co": "GitHub", "ct": "pr", "sk": {"gt": 15, "ct": 15}}, "2-7-2": {"w": 2, "d": 7, "sl": "🌆 Tarde · 4 hrs", "ti": "Preview Power BI: instalar + explorar", "de": "Descarga Power BI Desktop. Conecta un CSV. Explora la interfaz.", "co": "Power BI Desktop (gratuito)", "ct": "pr", "sk": {"bi": 5}}, "2-7-3": {"w": 2, "d": 7, "sl": "📱 Contenido · 30 min", "ti": "Post: \"Predije ventas con Prophet\"", "de": "Muestra gráfica de forecast vs real. MAPE obtenido. Lo que falló y cómo lo corregiste.", "co": "LinkedIn", "ct": "pr", "sk": {"ct": 20}}, "3-1-1": {"w": 3, "d": 1, "sl": "🌅 Mañana · 4 hrs", "ti": "Power BI: conectar fuentes y Power Query", "de": "Conectar Excel/CSV/SQL. Power Query: limpiar, transformar, merge de tablas.", "co": "LinkedIn — Power BI Essential Training · Cap 1-3", "ct": "li", "sk": {"bi": 20}}, "3-1-2": {"w": 3, "d": 1, "sl": "🌆 Tarde · 4 hrs", "ti": "DAX fundamentals: CALCULATE, FILTER, SUMX", "de": "Las 3 funciones DAX más importantes. Medidas vs columnas calculadas.", "co": "LinkedIn — Power BI Essential Training · Cap 4-6", "ct": "li", "sk": {"bi": 20}}, "3-2-1": {"w": 3, "d": 2, "sl": "🌅 Mañana · 4 hrs", "ti": "Power BI: visualizaciones y slicers", "de": "Bar, line, scatter, table, card, KPI. Slicers, drill-through, cross-filter.", "co": "LinkedIn — Power BI Essential Training · Cap 7-9", "ct": "li", "sk": {"bi": 20}}, "3-2-2": {"w": 3, "d": 2, "sl": "🌆 Tarde · 4 hrs", "ti": "Power BI: dashboard financiero completo", "de": "Dashboard con P&L, ratios de liquidez, solvencia y rentabilidad de datos reales.", "co": "Proyecto Power BI · Datos financieros", "ct": "pr", "sk": {"bi": 25, "cd": 10}}, "3-3-1": {"w": 3, "d": 3, "sl": "🌅 Mañana · 4 hrs", "ti": "Tableau Public: conectar datos y calculated fields", "de": "Tableau Public (gratis). Dimensiones vs medidas. Calculated fields básicos.", "co": "Tableau Public + Free Training", "ct": "pr", "sk": {"bi": 15, "vz": 5}}, "3-3-2": {"w": 3, "d": 3, "sl": "🌆 Tarde · 4 hrs", "ti": "Tableau: dashboard de KPIs con storytelling", "de": "Story points, layout containers, acciones de filtro. Presenta hallazgos como consultor.", "co": "Tableau Public · Dashboard tutorial", "ct": "pr", "sk": {"bi": 15, "vz": 10}}, "3-4-1": {"w": 3, "d": 4, "sl": "🌅 Mañana · 4 hrs", "ti": "A/B Testing: diseño estadístico correcto", "de": "Sample size (power=0.8, α=0.05), minimum detectable effect. Evita tests subdimensionados.", "co": "Coursera — A/B Testing (Google) · Sem 1", "ct": "co", "sk": {"st": 20}}, "3-4-2": {"w": 3, "d": 4, "sl": "🌆 Tarde · 4 hrs", "ti": "A/B Testing: t-test, chi², Mann-Whitney, Cohen d", "de": "Elige el test correcto según distribución. Cohen d para effect size práctico.", "co": "Coursera — A/B Testing (Google) · Sem 2", "ct": "co", "sk": {"st": 20}}, "3-5-1": {"w": 3, "d": 5, "sl": "🌅 Mañana · 4 hrs", "ti": "A/B Testing pitfalls: p-hacking y peeking", "de": "Multiple testing, stopping early, HARKing. Cómo los evitas con corrección de Bonferroni.", "co": "Coursera — A/B Testing (Google) · Sem 3", "ct": "co", "sk": {"st": 15}}, "3-5-2": {"w": 3, "d": 5, "sl": "🌆 Tarde · 4 hrs", "ti": "Bayesian A/B Testing con Python", "de": "Beta distribution, prior/posterior, Thompson Sampling. Más intuitivo que frecuentista.", "co": "Práctica propia · pymc o scipy", "ct": "pr", "sk": {"st": 20, "cd": 10}}, "3-6-1": {"w": 3, "d": 6, "sl": "🌅 Mañana · 4 hrs", "ti": "Storytelling con datos: framework para presentar", "de": "Minto Pyramid, So What, 3 actos. Estructura narrativa para cualquier análisis.", "co": "Libro: Storytelling with Data (Nussbaumer)", "ct": "pr", "sk": {"ct": 20, "vz": 10}}, "3-6-2": {"w": 3, "d": 6, "sl": "🌆 Tarde · 4 hrs", "ti": "Dashboard Power BI subido a Power BI Service", "de": "Publica gratis en app.powerbi.com. Link compartible sin instalación.", "co": "Power BI Service · cuenta gratuita", "ct": "pr", "sk": {"bi": 15, "ct": 10}}, "3-7-1": {"w": 3, "d": 7, "sl": "🌅 Mañana · 4 hrs", "ti": "EDA proyecto integrador: retail histórico", "de": "Dataset de ventas retail (Kaggle Rossman Store). EDA + feature engineering.", "co": "Dataset: Rossman Store Sales — Kaggle", "ct": "pr", "sk": {"ml": 10, "cd": 10}}, "3-7-2": {"w": 3, "d": 7, "sl": "🌆 Tarde · 4 hrs", "ti": "Preview freelance DS: Upwork y qué se pide", "de": "Lee 20 jobs de Data Science en Upwork. ¿Qué skills repiten? ¿Qué rates tienen?", "co": "Upwork.com · Data Science jobs", "ct": "pr", "sk": {"ct": 5}}, "3-7-3": {"w": 3, "d": 7, "sl": "📱 Contenido · 30 min", "ti": "Post: \"Construí un dashboard Power BI\"", "de": "Screenshot del dashboard. Qué insight reveló. Link a Power BI Service.", "co": "LinkedIn", "ct": "pr", "sk": {"ct": 20}}, "4-1-1": {"w": 4, "d": 1, "sl": "🌅 Mañana · 4 hrs", "ti": "Modelo LightGBM + TimeSeriesSplit en retail", "de": "Aplica el pipeline de S1+S2 al dataset de ventas. Baseline con LightGBM.", "co": "Proyecto integrador · Mes 2", "ct": "pr", "sk": {"ml": 20, "cd": 15}}, "4-1-2": {"w": 4, "d": 1, "sl": "🌆 Tarde · 4 hrs", "ti": "Tuning con Optuna: objetivo +5% sobre baseline", "de": "optuna + TimeSeriesSplit. 100 trials. Registra resultados en CSV.", "co": "Proyecto integrador · Tuning", "ct": "pr", "sk": {"ml": 20, "cd": 10}}, "4-2-1": {"w": 4, "d": 2, "sl": "🌅 Mañana · 4 hrs", "ti": "SHAP en el modelo de ventas", "de": "¿Qué features mueven las ventas? Beeswarm + dependence plots. Insight de negocio.", "co": "Proyecto integrador · Explicabilidad", "ct": "pr", "sk": {"ml": 15, "cd": 5}}, "4-2-2": {"w": 4, "d": 2, "sl": "🌆 Tarde · 4 hrs", "ti": "Dashboard Power BI del resultado del modelo", "de": "Conecta predicciones del modelo con Power BI. Real vs predicho por tienda/semana.", "co": "Power BI + Python output", "ct": "pr", "sk": {"bi": 20, "cd": 10}}, "4-3-1": {"w": 4, "d": 3, "sl": "🌅 Mañana · 4 hrs", "ti": "Notebook final: para reclutador o cliente", "de": "Intro del negocio, EDA clave, modelo, MAPE, SHAP, conclusiones. Nada de código crudo.", "co": "Proyecto integrador · Documentación", "ct": "pr", "sk": {"cd": 15, "ct": 10}}, "4-3-2": {"w": 4, "d": 3, "sl": "🌆 Tarde · 4 hrs", "ti": "README del proyecto en inglés", "de": "Problema, datos, metodología, resultados con imágenes, cómo ejecutar.", "co": "GitHub · README template", "ct": "pr", "sk": {"gt": 15, "ct": 15}}, "4-4-1": {"w": 4, "d": 4, "sl": "🌅 Mañana · 4 hrs", "ti": "Kaggle: Tabular Playground Series activa", "de": "Aplica pipeline de Mes 2 a la competencia activa. Target: top 30%.", "co": "Kaggle Competitions", "ct": "pr", "sk": {"ml": 20, "cd": 10}}, "4-4-2": {"w": 4, "d": 4, "sl": "🌆 Tarde · 4 hrs", "ti": "Revisar top 10 kernels de la competencia", "de": "¿Qué hacen diferente los top? ¿Qué técnica no conoces? Lista de features Mes 3.", "co": "Kaggle Notebooks · Benchmarking", "ct": "pr", "sk": {"ml": 10}}, "4-5-1": {"w": 4, "d": 5, "sl": "🌅 Mañana · 4 hrs", "ti": "LinkedIn: actualizar con proyectos de Mes 2", "de": "Sección de proyectos actualizada. Power BI como skill. Headline ajustado.", "co": "LinkedIn", "ct": "pr", "sk": {"ct": 15}}, "4-5-2": {"w": 4, "d": 5, "sl": "🌆 Tarde · 4 hrs", "ti": "Upwork: perfil con servicios de DS/BI", "de": "Overview, portfolio (2 proyectos), tarifas, test de skill de DS en Upwork.", "co": "Upwork · Freelancer profile", "ct": "pr", "sk": {"ct": 20}}, "4-6-1": {"w": 4, "d": 6, "sl": "🌅 Mañana · 4 hrs", "ti": "Retrospectiva mes 2 + plan mes 3", "de": "¿Qué funcionó? ¿Qué no? ¿Tiempo real vs estimado? Ajusta el plan.", "co": "Notion o Markdown", "ct": "pr", "sk": {"ct": 10}}, "4-6-2": {"w": 4, "d": 6, "sl": "🌆 Tarde · 4 hrs", "ti": "Instalar PyTorch + verificar CUDA", "de": "pip install torch torchvision. torch.cuda.is_available(). Primer tensor.", "co": "PyTorch.org · Get Started", "ct": "pr", "sk": {"dl": 10, "cd": 5}}, "4-7-1": {"w": 4, "d": 7, "sl": "🌅 Mañana · 4 hrs", "ti": "Push todos los proyectos a GitHub", "de": "Estructura: /proyectos/mes2-forecasting, /mes2-powerbi. READMEs completos.", "co": "GitHub", "ct": "pr", "sk": {"gt": 20, "ct": 10}}, "4-7-2": {"w": 4, "d": 7, "sl": "🌆 Tarde · 4 hrs", "ti": "Preview Deep Learning: qué estudiarás en Mes 3", "de": "¿Qué es una red neuronal? ¿Por qué PyTorch > TensorFlow en 2025? Artículos.", "co": "Towards Data Science · DL intro", "ct": "co", "sk": {"dl": 5}}, "4-7-3": {"w": 4, "d": 7, "sl": "📱 Contenido · 30 min", "ti": "Post: \"Mes 2 completado\"", "de": "Skills nuevos, proyectos construidos, MAPE del forecasting. Evolución visual.", "co": "LinkedIn + GitHub", "ct": "pr", "sk": {"ct": 25}}};
+const WEEK_THEMES = {"1": "XGBoost, SHAP y Feature Engineering", "2": "Time Series (Prophet + ARIMA)", "3": "Power BI, Tableau y A/B Testing", "4": "Proyecto Integrador + Kaggle"};
+const WEEK_DELIVERABLES = {"1": "Pipeline de clasificación con XGBoost + SHAP + Optuna en GitHub.", "2": "Proyecto forecasting de ventas con Prophet/XGBoost + notebook documentado.", "3": "Dashboard Power BI publicado en Power BI Service + link compartible.", "4": "Proyecto retail en GitHub + perfil Upwork activado + Kaggle top 30%."};
+const DAY_THEMES = {"1": {"1": "XGBoost desde cero", "2": "SHAP y Optuna", "3": "Imbalanced + Pipelines", "4": "CatBoost y Ensemble", "5": "Cross-val y Learning Curves", "6": "Pipeline template", "7": "Notebook + Preview TS"}, "2": {"1": "TS fundamentos + ARIMA", "2": "Prophet + pmdarima", "3": "Feature engineering TS", "4": "XGBoost en TS", "5": "Proyecto ventas", "6": "Anomaly + VAR", "7": "GitHub + Preview Power BI"}, "3": {"1": "Power BI Query + DAX", "2": "Power BI Dashboard", "3": "Tableau", "4": "A/B Testing diseño", "5": "Bayesian A/B", "6": "Storytelling + PBI Service", "7": "EDA integrador + Upwork"}, "4": {"1": "LightGBM en retail", "2": "SHAP + Power BI del modelo", "3": "Notebook final + README", "4": "Kaggle + kernels review", "5": "LinkedIn + Upwork", "6": "Retrospectiva + PyTorch", "7": "GitHub + Preview DL"}};
+
+
+const SL_MAP = ['','🌅 Mañana · 4 hrs','🌆 Tarde · 4 hrs','📱 Contenido · 30 min'];
+const DN = {1:'Lunes',2:'Martes',3:'Miércoles',4:'Jueves',5:'Viernes',6:'Sábado',7:'Domingo'};
+
+// Skill maxes for THIS month only (for progress bars)
+const SK_MAX = {};
+Object.keys(TASKS).forEach(k=>{Object.keys(TASKS[k].sk).forEach(s=>{SK_MAX[s]=(SK_MAX[s]||0)+TASKS[k].sk[s];});});
+
+// Task weight
+const ALL_PTS = Object.values(TASKS).reduce((s,t)=>s+Object.values(t.sk).reduce((a,v)=>a+v,0),0);
+function taskWeight(k){return (Object.values(TASKS[k].sk).reduce((a,v)=>a+v,0)/ALL_PTS*100).toFixed(1);}
+function getEstMin(k){return k.endsWith('-3')?30:240;}
+function fmtEst(k){const m=getEstMin(k);return m>=60?(m/60)+'h est.':m+'min est.';}
+
+// Task state
+let state={};
+try{const s=localStorage.getItem(STORE);if(s)state=JSON.parse(s);}catch(e){}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(state));}catch(e){}}
+
+// Timer state
+let timerState={},activeTimer=null,timerTick=null;
+function loadTimers(){
+  try{const s=localStorage.getItem(TIMER_STORE);if(s)timerState=JSON.parse(s);}catch(e){}
+  Object.keys(timerState).forEach(k=>{if(timerState[k]&&timerState[k].startedAt){timerState[k].elapsed+=Math.floor((Date.now()-timerState[k].startedAt)/1000);timerState[k].startedAt=null;}});
+}
+function saveTimers(){try{localStorage.setItem(TIMER_STORE,JSON.stringify(timerState));}catch(e){}}
+function fmtSec(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;return h>0?h+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0'):m+':'+String(ss).padStart(2,'0');}
+function toggleTimer(k){
+  if(activeTimer&&activeTimer!==k)pauseTimer(activeTimer);
+  if(!timerState[k])timerState[k]={elapsed:0,startedAt:null};
+  if(timerState[k].startedAt){pauseTimer(k);}
+  else{timerState[k].startedAt=Date.now();activeTimer=k;clearInterval(timerTick);timerTick=setInterval(tickAll,1000);refreshTimerUI(k);}
+  saveTimers();
+}
+function pauseTimer(k){
+  if(timerState[k]&&timerState[k].startedAt){timerState[k].elapsed+=Math.floor((Date.now()-timerState[k].startedAt)/1000);timerState[k].startedAt=null;}
+  if(activeTimer===k){activeTimer=null;clearInterval(timerTick);}
+  refreshTimerUI(k);saveTimers();
+}
+function tickAll(){if(activeTimer)refreshTimerUI(activeTimer);}
+function refreshTimerUI(k){
+  const ts=timerState[k];if(!ts)return;
+  const running=!!ts.startedAt;
+  const elapsed=running?ts.elapsed+Math.floor((Date.now()-ts.startedAt)/1000):ts.elapsed;
+  const tel=document.getElementById('tel-'+k),tbtn=document.getElementById('tbtn-'+k),trow=document.getElementById('tr-'+k);
+  if(tel)tel.textContent=fmtSec(elapsed);
+  if(tbtn)tbtn.textContent=running?'⏸':'▶';
+  if(trow)trow.classList.toggle('timing',running);
+}
+function initTimers(){Object.keys(timerState).forEach(k=>{if((timerState[k].elapsed||0)>0)refreshTimerUI(k);});}
+
+function renderChecklist(){
+  const body=document.getElementById('checklist-body');body.innerHTML='';
+  for(let w=1;w<=4;w++){
+    const wdiv=document.createElement('div');wdiv.className='wcontent w'+w;wdiv.id='wc-'+w;
+    if(w===1)wdiv.classList.add('active');
+    const wsub=document.createElement('div');wsub.className='wsub';wsub.id='wsub-'+w;
+    wsub.textContent='0 de '+Object.keys(TASKS).filter(k=>TASKS[k].w===w).length+' tareas · 0%';
+    wdiv.appendChild(wsub);
+    for(let d=1;d<=7;d++){
+      const dayTasks=Object.keys(TASKS).filter(k=>TASKS[k].w===w&&TASKS[k].d===d);
+      if(!dayTasks.length)continue;
+      const card=document.createElement('div');card.className='day-card';
+      const hdr=document.createElement('div');hdr.className='day-hdr';
+      hdr.innerHTML='<span class="day-name">'+DN[d]+'</span><span class="day-theme">'+DAY_THEMES[w][d]+'</span><span class="day-badge" id="dbadge-'+w+'-'+d+'">0/'+dayTasks.length+'</span>';
+      card.appendChild(hdr);
+      dayTasks.forEach(k=>{
+        const t=TASKS[k];const isC=k.endsWith('-3');
+        const row=document.createElement('div');row.className='task-row'+(isC?' content-slot':'');row.id='tr-'+k;row.onclick=()=>toggle(k);
+        const pips=Object.keys(t.sk).map(s=>'<span class="skill-pip" style="background:'+SK_DEF[s].color+'20;color:'+SK_DEF[s].color+'">'+SK_DEF[s].icon+'+'+t.sk[s]+'</span>').join('');
+        row.innerHTML='<div class="task-check" id="tc-'+k+'"></div><div class="task-info"><div class="task-slot">'+t.sl+'</div><div class="task-title">'+t.ti+'</div><div class="task-desc">'+t.de+'</div><div class="task-meta"><span class="course-tag '+t.ct+'">'+t.co+'</span>'+pips+'</div><div class="task-timer"><span style="font-size:11px;font-family:monospace;color:#aaa">⏱ </span><span class="timer-real" id="tel-'+k+'">0:00</span><span class="timer-sep"> / </span><span class="timer-est">'+fmtEst(k)+'</span><button class="timer-btn" id="tbtn-'+k+'" >▶</button><span class="task-weight">'+taskWeight(k)+'%</span></div></div>';
+        card.appendChild(row);
+        row.querySelector('#tbtn-'+k).onclick=function(e){e.stopPropagation();toggleTimer(k);};
+      });
+      if(d===7){const deliv=document.createElement('div');deliv.className='deliv';deliv.innerHTML='<span>🏆</span><span><strong>Entregable S'+w+':</strong> '+WEEK_DELIVERABLES[w]+'</span>';card.appendChild(deliv);}
+      wdiv.appendChild(card);
+    }
+    body.appendChild(wdiv);
+  }
+  updateAll();
+}
+
+function renderGantt(){
+  const body=document.getElementById('gantt-body');body.innerHTML='';
+  for(let w=1;w<=4;w++){
+    const row=document.createElement('div');row.className='gantt-row';
+    const wl=document.createElement('div');wl.className='gantt-week-label';
+    wl.innerHTML='<strong>S'+w+'</strong><br><span style="font-size:10px;color:#999;font-weight:400">'+WEEK_THEMES[w]+'</span>';
+    row.appendChild(wl);
+    for(let d=1;d<=7;d++){
+      const cell=document.createElement('div');cell.className='gantt-cell';cell.id='gc-'+w+'-'+d;
+      const dt=Object.keys(TASKS).filter(k=>TASKS[k].w===w&&TASKS[k].d===d);
+      const estH=Math.round(dt.reduce((s,k)=>s+getEstMin(k),0)/60);
+      const dots=dt.map(k=>'<div class="gantt-dot'+(k.endsWith('-3')?' content':'')+'" id="gd-'+k+'"></div>').join('');
+      cell.innerHTML='<div style="font-size:9px;font-weight:700;color:#aaa">'+DN[d].slice(0,3)+'</div><div class="gantt-dots">'+dots+'</div><div class="gantt-pct" id="gpct-'+w+'-'+d+'">0%</div><div style="font-size:9px;color:#ccc">'+estH+'h</div><div class="gantt-time" id="gtime-'+w+'-'+d+'"></div>';
+      row.appendChild(cell);
+    }
+    body.appendChild(row);
+  }
+}
+
+function renderSkills(){
+  const body=document.getElementById('skills-body');body.innerHTML='';
+  Object.keys(SK_DEF).filter(s=>SK_MAX[s]).forEach(s=>{
+    const card=document.createElement('div');card.className='skill-card';
+    card.innerHTML='<div class="skill-top"><div class="skill-name" style="color:'+SK_DEF[s].color+'">'+SK_DEF[s].icon+' '+SK_DEF[s].label+'</div><div class="skill-pts" id="spts-'+s+'" style="color:'+SK_DEF[s].color+'">0/'+SK_MAX[s]+'pts</div></div><div class="skill-bar-outer"><div class="skill-bar-inner" id="sbar-'+s+'" style="width:0%;background:'+SK_DEF[s].color+'"></div></div><div class="skill-pct" id="spct-'+s+'">0%</div>';
+    body.appendChild(card);
+  });
+}
+
+function toggle(k){state[k]=!state[k];save();applyTask(k);updateAll();}
+function applyTask(k){
+  const done=!!state[k];
+  const tr=document.getElementById('tr-'+k),tc=document.getElementById('tc-'+k);
+  if(tr)tr.classList.toggle('done',done);
+  if(tc){tc.classList.toggle('done',done);tc.innerHTML=done?'✓':'';}
+  const gd=document.getElementById('gd-'+k);if(gd)gd.classList.toggle('done',done);
+}
+function updateAll(){
+  let gT=0,gD=0;const skP={};Object.keys(SK_DEF).forEach(s=>skP[s]=0);
+  Object.keys(TASKS).forEach(k=>{gT++;if(state[k]){gD++;Object.keys(TASKS[k].sk).forEach(s=>skP[s]=(skP[s]||0)+TASKS[k].sk[s]);}});
+  const gPct=gT?Math.round(gD/gT*100):0;
+  const gb=document.getElementById('gBar'),gp=document.getElementById('gPct');
+  if(gb)gb.style.width=gPct+'%';if(gp)gp.textContent=gPct+'%';
+  for(let w=1;w<=4;w++){
+    const wT=Object.keys(TASKS).filter(k=>TASKS[k].w===w);const wD=wT.filter(k=>state[k]).length;
+    const wsub=document.getElementById('wsub-'+w);
+    if(wsub)wsub.textContent=wD+' de '+wT.length+' tareas · '+Math.round(wD/wT.length*100)+'% completado';
+    for(let d=1;d<=7;d++){
+      const dT=Object.keys(TASKS).filter(k=>TASKS[k].w===w&&TASKS[k].d===d);if(!dT.length)continue;
+      const dD=dT.filter(k=>state[k]).length;
+      const badge=document.getElementById('dbadge-'+w+'-'+d);
+      if(badge){badge.textContent=dD+'/'+dT.length;badge.classList.toggle('all-done',dD===dT.length);}
+      const cell=document.getElementById('gc-'+w+'-'+d),pct=document.getElementById('gpct-'+w+'-'+d);
+      if(cell){cell.classList.remove('empty','partial','complete');if(dD===0)cell.classList.add('empty');else if(dD===dT.length)cell.classList.add('complete');else cell.classList.add('partial');}
+      if(pct)pct.textContent=Math.round(dD/dT.length*100)+'%';
+      const gt=document.getElementById('gtime-'+w+'-'+d);
+      if(gt){const tSec=dT.reduce((s,k)=>{const ts=timerState[k];return s+(ts?ts.elapsed+(ts.startedAt?Math.floor((Date.now()-ts.startedAt)/1000):0):0);},0);gt.textContent=tSec>0?'⏱'+fmtSec(tSec):'';}
+    }
+  }
+  Object.keys(SK_DEF).forEach(s=>{
+    const pts=skP[s]||0,max=SK_MAX[s]||1,pct=Math.round(pts/max*100);
+    const spts=document.getElementById('spts-'+s),sbar=document.getElementById('sbar-'+s),spct=document.getElementById('spct-'+s);
+    if(spts)spts.textContent=pts+'/'+max+'pts';if(sbar)sbar.style.width=pct+'%';if(spct)spct.textContent=pct+'%';
+  });
+}
+function showNav(id,el){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));document.getElementById('sec-'+id).classList.add('active');el.classList.add('active');}
+function showWeek(n,el){document.querySelectorAll('.wcontent').forEach(w=>w.classList.remove('active'));document.querySelectorAll('.wtab').forEach(t=>t.classList.remove('active'));const wc=document.getElementById('wc-'+n);if(wc)wc.classList.add('active');if(el)el.classList.add('active');}
+function resetAll(){if(!confirm('¿Reiniciar progreso de este mes? (Los tiempos se conservan)'))return;state={};save();Object.keys(TASKS).forEach(k=>applyTask(k));updateAll();}
+function downloadPlan(){
+  const totalMin=Object.keys(TASKS).reduce((s,k)=>s+getEstMin(k),0);
+  const W_COLORS={1:'#1a5fa8',2:'#1e6b2a',3:'#a85500',4:'#6622cc'};
+  let h='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Plan '+MONTH_TITLE+'</title><style>body{font-family:-apple-system,sans-serif;max-width:800px;margin:0 auto;padding:20px;font-size:13px;color:#1a1a1a}h1{font-size:18px;color:#1a5fa8;border-bottom:3px solid #1a5fa8;padding-bottom:8px;margin-bottom:14px}.summary{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.stat{background:#f0f6ff;border-radius:8px;padding:8px 14px;text-align:center}.stat-n{font-size:18px;font-weight:800;color:#1a5fa8}.stat-l{font-size:10px;color:#888}h2{font-size:14px;font-weight:700;margin:16px 0 6px;padding:6px 10px;border-radius:7px;color:#fff}.day-title{font-size:12px;font-weight:700;background:#f7f8fa;padding:5px 10px;border-radius:6px;margin:8px 0 4px;display:flex;justify-content:space-between}.slot-block{margin-bottom:4px;border:1px solid #f0f0f0;border-radius:7px;overflow:hidden}.slot-header{padding:4px 10px;background:#f7f8fa;font-size:10px;font-weight:700;color:#888;text-transform:uppercase}.task-block{padding:7px 10px;border-top:1px solid #f5f5f5}.task-name{font-size:12px;font-weight:600}.task-name.done{text-decoration:line-through;color:#aaa}.task-desc{font-size:11px;color:#666;margin:2px 0 0 20px}.task-meta-line{font-size:10px;color:#aaa;margin:2px 0 0 20px}.deliv{margin-top:6px;padding:5px 10px;background:#fffbf0;border:1px solid #f5d090;border-radius:6px;font-size:11px;color:#7a5800}@media print{.slot-block{break-inside:avoid}}</style></head><body>';
+  h+='<h1>🎯 '+MONTH_TITLE+'</h1><div class="summary"><div class="stat"><div class="stat-n">'+Object.keys(TASKS).length+'</div><div class="stat-l">Tareas</div></div><div class="stat"><div class="stat-n">'+Math.round(totalMin/60)+'h</div><div class="stat-l">Horas est.</div></div><div class="stat"><div class="stat-n">4</div><div class="stat-l">Semanas</div></div><div class="stat"><div class="stat-n">'+Object.keys(TASKS).filter(k=>state[k]).length+'/'+Object.keys(TASKS).length+'</div><div class="stat-l">Completadas</div></div></div>';
+  for(let w=1;w<=4;w++){
+    h+='<h2 style="background:'+W_COLORS[w]+'">Semana '+w+' — '+WEEK_THEMES[w]+'</h2>';
+    for(let d=1;d<=7;d++){
+      const dT=Object.keys(TASKS).filter(k=>TASKS[k].w===w&&TASKS[k].d===d);if(!dT.length)continue;
+      const dMin=dT.reduce((s,k)=>s+getEstMin(k),0);const dD=dT.filter(k=>state[k]).length;
+      const dSec=dT.reduce((s,k)=>{const ts=timerState[k];return s+(ts?ts.elapsed:0);},0);
+      h+='<div class="day-title"><span>'+DN[d]+' — '+DAY_THEMES[w][d]+'</span><span style="font-weight:400;color:#aaa">'+Math.round(dMin/60)+'h · '+dD+'/'+dT.length+(dSec>0?' · ⏱'+fmtSec(dSec):'')+'</span></div>';
+      for(let sl=1;sl<=3;sl++){
+        const slT=dT.filter(k=>parseInt(k.split('-')[2])===sl);if(!slT.length)continue;
+        const slL=['','🌅 Mañana (8:00-12:00 · 4h)','🌆 Tarde (13:00-17:00 · 4h)','📱 Contenido (17:00-17:30 · 30min)'][sl];
+        h+='<div class="slot-block"><div class="slot-header">'+slL+'</div>';
+        slT.forEach(k=>{
+          const t=TASKS[k];const done=!!state[k];const ts=timerState[k]||{elapsed:0};const wt=taskWeight(k);
+          const icon=done?'✅':'○';const cls=done?' done':'';const realT=ts.elapsed>0?' · real: '+fmtSec(ts.elapsed):'';
+          h+='<div class="task-block"><div>'+icon+'<span class="task-name'+cls+'">&nbsp;'+t.ti+'</span></div><div class="task-desc">'+t.de+'</div><div class="task-meta-line">📚 '+t.co+' · ⚖️ '+wt+'% del mes · ⏱ est: '+fmtEst(k)+realT+'</div></div>';
+        });
+        h+='</div>';
+      }
+      if(d===7)h+='<div class="deliv">🏆 <strong>Entregable S'+w+':</strong> '+WEEK_DELIVERABLES[w]+'</div>';
+    }
+  }
+  h+='<p style="margin-top:20px;font-size:10px;color:#ccc">Generado '+new Date().toLocaleDateString("es-MX")+' · '+MONTH_TITLE+'</p></body></html>';
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([h],{type:'text/html'}));a.download='plan_mes'+MONTH_NUM+'.html';document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+
+
+loadTimers();
+renderChecklist();
+renderGantt();
+renderSkills();
+Object.keys(TASKS).forEach(k=>applyTask(k));
+updateAll();
+initTimers();
+
+
+</script>
+<div class="section" id="sec-sq" style="padding:14px 18px 40px"><div style="font-size:12px;color:#aaa;margin-bottom:16px">Recursos gratuitos para complementar el mes. Ábrelos en una nueva pestaña y explora a tu ritmo 🚀</div><div class="sq-cat"><div class="sq-cat-title">🤖 ML Avanzado</div><div class="sq-grid"><a class="sq-item" href="https://kaggle.com/learn/intermediate-machine-learning" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Kaggle — Intermediate ML</div><div class="sq-item-desc">XGBoost, pipelines, validación</div><div class="sq-item-link">kaggle.com ↗</div></div></a><a class="sq-item" href="https://kaggle.com/learn/feature-engineering" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Kaggle — Feature Engineering</div><div class="sq-item-desc">Técnicas de FE con datos reales</div><div class="sq-item-link">kaggle.com ↗</div></div></a><a class="sq-item" href="https://optuna.readthedocs.io" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Optuna Docs</div><div class="sq-item-desc">Documentación oficial + tutoriales</div><div class="sq-item-link">optuna.readthedocs.io ↗</div></div></a><a class="sq-item" href="https://shap.readthedocs.io" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">SHAP Docs</div><div class="sq-item-desc">Interpretabilidad de modelos ML</div><div class="sq-item-link">shap.readthedocs.io ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">📈 Series de Tiempo</div><div class="sq-grid"><a class="sq-item" href="https://kaggle.com/learn/time-series" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Kaggle — Time Series</div><div class="sq-item-desc">Forecasting con código práctico</div><div class="sq-item-link">kaggle.com ↗</div></div></a><a class="sq-item" href="https://facebook.github.io/prophet" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Prophet Docs</div><div class="sq-item-desc">Documentación + ejemplos de Meta</div><div class="sq-item-link">facebook.github.io ↗</div></div></a><a class="sq-item" href="https://unit8co.github.io/darts" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Darts Library</div><div class="sq-item-desc">Librería open-source de forecasting</div><div class="sq-item-link">unit8co.github.io ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">📊 BI y Visualización</div><div class="sq-grid"><a class="sq-item" href="https://public.tableau.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Tableau Public</div><div class="sq-item-desc">Tableau gratis con datos públicos</div><div class="sq-item-link">public.tableau.com ↗</div></div></a><a class="sq-item" href="https://lookerstudio.google.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Google Looker Studio</div><div class="sq-item-desc">Power BI gratis de Google</div><div class="sq-item-link">lookerstudio.google.com ↗</div></div></a><a class="sq-item" href="https://kaggle.com/learn/data-visualization" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Kaggle — Data Viz</div><div class="sq-item-desc">Seaborn y storytelling con datos</div><div class="sq-item-link">kaggle.com ↗</div></div></a><a class="sq-item" href="https://matplotlib.org/stable/gallery" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Matplotlib Gallery</div><div class="sq-item-desc">Cientos de ejemplos con código</div><div class="sq-item-link">matplotlib.org ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">🧪 A/B Testing</div><div class="sq-grid"><a class="sq-item" href="https://evanmiller.org/ab-testing" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Evan Miller A/B Calculator</div><div class="sq-item-desc">Calculadora de significancia estadística</div><div class="sq-item-link">evanmiller.org ↗</div></div></a><a class="sq-item" href="https://towardsdatascience.com/tagged/ab-testing" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Statistical Significance Explained</div><div class="sq-item-desc">Artículos en Towards Data Science</div><div class="sq-item-link">towardsdatascience.com ↗</div></div></a></div></div><div class="sq-cat"><div class="sq-cat-title">💻 Competencias</div><div class="sq-grid"><a class="sq-item" href="https://kaggle.com/c/titanic" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Kaggle Titanic</div><div class="sq-item-desc">La competencia clásica para empezar</div><div class="sq-item-link">kaggle.com ↗</div></div></a><a class="sq-item" href="https://kaggle.com/c/house-prices-advanced-regression-techniques" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">Kaggle House Prices</div><div class="sq-item-desc">Regresión con Feature Engineering</div><div class="sq-item-link">kaggle.com ↗</div></div></a><a class="sq-item" href="https://stratascratch.com" target="_blank" rel="noopener"><div class="sq-item-icon">🔗</div><div><div class="sq-item-name">StrataScratch</div><div class="sq-item-desc">Casos de entrevista de empresas reales (Google, Netflix...)</div><div class="sq-item-link">stratascratch.com ↗</div></div></a></div></div></div></body>
+</html>
